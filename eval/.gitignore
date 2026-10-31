@@ -2,3 +2,6 @@
 data/raw/
 results_smoke/
 __pycache__/
+aml/target/
+results/aml/state/
+results/aml/events/
