@@ -18,3 +18,12 @@ apps/actors/out/
 keys/
 # OS
 .DS_Store
+# Live-mode runtime state and credentials (WP2): never commit
+.durable-actors/
+.agent-relay/
+*.db
+*.db-wal
+*.db-shm
+apps/actors/bridge/.env
+apps/actors/bridge/terse/.env
+apps/actors/bridge/terse/node_modules/

@@ -8,6 +8,15 @@ importers:
 
   .: {}
 
+  apps/actors/bridge:
+    dependencies:
+      '@agent-relay/sdk':
+        specifier: 15.0.1
+        version: 15.0.1
+      zod:
+        specifier: 4.4.3
+        version: 4.4.3
+
   apps/web:
     dependencies:
       '@noble/ed25519':
@@ -78,6 +87,10 @@ importers:
   packages/protocol: {}
 
 packages:
+
+  '@agent-relay/sdk@15.0.1':
+    resolution: {integrity: sha512-+I6LMGJnYO3e/yA+8yWOiWeJ43e9qJ6g6/5Hpspecj+qKBY3tIsQB5h47AX1AwTR9GDRXkT8Qp4f/RTj3K+vkg==}
+    engines: {node: '>=22.0.0'}
 
   '@babel/runtime@7.29.10':
     resolution: {integrity: sha512-NpugTzbKgGrNe45Ui32cN8vCFFMxVtP/9rtfwv0nP5FRDAjvYBxJcLVpYA9mr1jxP6cnIT7x9LUzuDTbWYYNRA==}
@@ -158,6 +171,12 @@ packages:
         optional: true
       react-redux:
         optional: true
+
+  '@relaycast/sdk@8.16.0':
+    resolution: {integrity: sha512-c3jXSDR2WAJCaiNsd92N/3sADLDHkFraw4Ogey2sKLtq48D/p/TQLnD9BE5r9Rk5zoZ0Y8Ls4mzceCeVGekFBQ==}
+
+  '@relaycast/types@8.16.0':
+    resolution: {integrity: sha512-yLho3/MMMCu4+GEt0L67XU/n5HUatq9mDEsNlOZUPcAjHTCbbTNjN7MRfb6y91wKeLvzha0ggHJ3DzxR4mH4GQ==}
 
   '@rolldown/binding-android-arm-eabi@1.2.16':
     resolution: {integrity: sha512-ia3DwAs0OsMGS7+IConptSiyk9pEXkOx/AbJ2n/lAGxH3QkWQus1t8d7gnAT38FCU2sQu8lUbeR6AiZFv4JxaA==}
@@ -881,6 +900,9 @@ packages:
     engines: {node: '>= 8'}
     hasBin: true
 
+  zod@4.4.3:
+    resolution: {integrity: sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==}
+
   zustand@4.5.7:
     resolution: {integrity: sha512-CHOUy7mu3lbD6o6LJLfllpjkzhHXSBlX8B9+qPddUsIfeF5S/UZ5q0kmCsnRqT1UHFQZchNFDDzMbQsuesHWlw==}
     engines: {node: '>=12.7.0'}
@@ -915,6 +937,12 @@ packages:
         optional: true
 
 snapshots:
+
+  '@agent-relay/sdk@15.0.1':
+    dependencies:
+      '@relaycast/sdk': 8.16.0
+      '@relaycast/types': 8.16.0
+      zod: 4.4.3
 
   '@babel/runtime@7.29.10': {}
 
@@ -1008,6 +1036,15 @@ snapshots:
     optionalDependencies:
       react: 19.3.1
       react-redux: 9.3.1(@types/react@19.3.0)(react@19.3.1)(redux@5.0.1)
+
+  '@relaycast/sdk@8.16.0':
+    dependencies:
+      '@relaycast/types': 8.16.0
+      zod: 4.4.3
+
+  '@relaycast/types@8.16.0':
+    dependencies:
+      zod: 4.4.3
 
   '@rolldown/binding-android-arm-eabi@1.2.16':
     optional: true
@@ -1575,6 +1612,8 @@ snapshots:
   which@2.0.2:
     dependencies:
       isexe: 2.0.0
+
+  zod@4.4.3: {}
 
   zustand@4.5.7(@types/react@19.3.0)(immer@11.2.9)(react@19.3.1):
     dependencies:

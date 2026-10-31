@@ -496,27 +496,49 @@ configured by `TERSE_ACTOR_URL` (default local dev server
 (hosted only). The local runtime (`terse actor dev --port 7100`) needs no
 account; `terse init` and `terse deploy` require `terse auth login`.
 
-## Planned Relay channels
+## Relay channels (live mode)
 
-Not part of WP1. When transport moves off the in-memory Ledger, each case
-maps to these channels under a configurable prefix:
+Transport is Agent Relay (`@agent-relay/sdk` 15.0.1). The bridge
+(`apps/actors/bridge/src/relay.js`) registers one agent per case for the
+Clerk, one per juror, and one read-only tap (the engine does not echo an
+agent's own posts to its own stream, so the tap joins every channel to see
+all messages exactly once). Channels are created per case:
 
 ```
-<prefix>/<caseId>/evidence
-<prefix>/<caseId>/commit/<round>
-<prefix>/<caseId>/reveal/<round>
-<prefix>/<caseId>/argument
-<prefix>/<caseId>/phase
-<prefix>/<caseId>/cert
+sv-<caseId>-evidence
+sv-<caseId>-commit-<round>
+sv-<caseId>-reveal-<round>
+sv-<caseId>-argument
+sv-<caseId>-phase       { marker: Signed<PhaseMarker>, next: { phase, round, deadlineMs } | "verdict" }
+sv-<caseId>-cert        { caseId, verdict, valid, failures }
 ```
 
-The proposed adapter boundary is a `Transport` trait on the Ledger (publish
-and subscribe to entries) and an `EvidenceSource` trait on the Oracle (resolve
-a source name to content). Neither trait exists in the WP1 code; the Ledger
-and Oracle are concrete in-memory types, and the traits would be introduced
-by the sponsor-adapter package once its plan is approved. Nothing here assumes
-either sponsor provides a native Rust SDK; the adapters may sit behind a thin
-HTTP or Node boundary.
+Messages are JSON text. Only envelopes received on the evidence, commit,
+reveal, and argument channels enter admission; phase and cert are mirrors
+and are never re-admitted. The daemon's own Oracle evidence is published to
+the evidence channel and admitted when it comes back, so every externally
+admitted entry has a Relay message id, recorded in the sidecar
+`apps/actors/out/<caseId>.relay.json` (`seqToMessage`) without touching the
+frozen LedgerEntry fields.
+
+Signing intents are private: a juror sends `{ kind: "commit" | "reveal" |
+"argument", round, vote?, confidence?, text?, evidenceIds? }` as a Relay DM
+to the clerk agent. The bridge binds the DM's authenticated sender id
+(`message.from.id`, verified against the installed SDK types and a real DM)
+to that juror's signing shell, asks the daemon to sign, publishes the signed
+envelope on the public channel, and DMs back `{ ok, kind, round, messageId }`
+or `{ ok: false, error }`. Plaintext votes and nonces never appear on a public
+channel before the reveal window; the acceptance test
+`apps/actors/bridge/test/live-e2e.mjs` checks every public channel for this.
+
+Credentials: the workspace key (`RELAY_WORKSPACE_KEY`) stays in the bridge.
+Jurors receive only their own agent token through a private handoff file
+(`apps/actors/bridge/.tokens/<caseId>.json`, gitignored, mode 600) and
+connect with `createAgentClient({ agentToken, baseUrl })` from
+`@agent-relay/sdk/messaging`. There are no private channels in Relay; the
+Clerk is the enforcement point and never relies on channel read
+restrictions. Terse and Relay are both exercised against local runtimes in
+WP2; hosted deployment is a later step.
 
 ## Known limits
 
