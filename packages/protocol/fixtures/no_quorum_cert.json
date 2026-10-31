@@ -1,0 +1,592 @@
+{
+  "cert": {
+    "body": {
+      "caseId": "fixture-no-quorum",
+      "evidenceIds": [
+        "ev-0",
+        "ev-1"
+      ],
+      "quorum": {
+        "counted": 4,
+        "f": 1,
+        "n": 4,
+        "needed": 3
+      },
+      "registry": {
+        "caseId": "fixture-no-quorum",
+        "choices": [
+          "ans0",
+          "ans1",
+          "ans2"
+        ],
+        "clerk": "19a0b39f1b64346c78e907d905d3ed7673c9196cf03e9d74bfbb55878bb14457",
+        "condition": "C3",
+        "jurors": [
+          {
+            "id": "juror-1",
+            "pubkey": "053125fd6a5bcfb39c0d608dea2a5bec3da538583985ba98a60ff69b884cd9ca"
+          },
+          {
+            "id": "juror-2",
+            "pubkey": "f56537c97d556dc43da4eead0d0e6c4cf73fa55f210ccf8c5b7f94387b30ad56"
+          },
+          {
+            "id": "juror-3",
+            "pubkey": "d925247dde7b497b8b4fecd82126c71e0a5b7539530b08cb97922bfdbd2fb5bf"
+          },
+          {
+            "id": "juror-4",
+            "pubkey": "54ce2e63eb9b2e58604b215fac1b4c84be566a7f96c81277cb10c3d1294af6fb"
+          }
+        ],
+        "ledger": "69ab5262ea626afee8df992b7c513250d78ea8613b86d12de027df387d5a39fd",
+        "oracle": "29ab401524b6efc366bd5d46fd8354d5e4a5722e1fb6e7af9f34f4aa40c3a1be"
+      },
+      "transcriptLen": 28,
+      "transcriptRoot": "0a36f4c1774c26f70054505f66b213f0fe78a56680c445aff1523965e5f08afa",
+      "verdict": "NO_QUORUM",
+      "votes": [
+        {
+          "body": {
+            "caseId": "fixture-no-quorum",
+            "confidence": 80,
+            "juror": "juror-1",
+            "nonce": "1eecc1e52009f78b9eeeea75ae93a45a764cf4ec879cd1fd0c0c0ec155612fd6",
+            "round": 1,
+            "vote": "ans2"
+          },
+          "sig": "25e213c78302dd7df3141657615a406ffe399038daa46bf66e6ec99fd401a08e62f9c63efc3766919a5c74989bed752eb2c4be095468536ac3d9ad61d4497a08",
+          "signer": "053125fd6a5bcfb39c0d608dea2a5bec3da538583985ba98a60ff69b884cd9ca"
+        },
+        {
+          "body": {
+            "caseId": "fixture-no-quorum",
+            "confidence": 65,
+            "juror": "juror-2",
+            "nonce": "35e671660643fdd346b25511b53f47f2b9a7ee9384dfbcd2561050dbcb0f1b0f",
+            "round": 1,
+            "vote": "ans2"
+          },
+          "sig": "35e32b9724b5ab6aeda34615d005e86c8535d2ed77324269a264202bfa7279c427795ecac16e5b489bb8dc91a8323d6895a329d9792a897ee76d4fd8d61d8c02",
+          "signer": "f56537c97d556dc43da4eead0d0e6c4cf73fa55f210ccf8c5b7f94387b30ad56"
+        },
+        {
+          "body": {
+            "caseId": "fixture-no-quorum",
+            "confidence": 90,
+            "juror": "juror-3",
+            "nonce": "b69d2afa8ba3b86be7effac6494565cb2d27fa9eddf4cf3cbc9b14286638ad73",
+            "round": 1,
+            "vote": "ans0"
+          },
+          "sig": "dfd2903a696a9869bda8037db05bc319e1b2ba76ea3abd2c7fd31771d38080e53c6efc5c91f2b73543e3a7ed23adbd0db348d36b661ecef9673b1ace12ffc10d",
+          "signer": "d925247dde7b497b8b4fecd82126c71e0a5b7539530b08cb97922bfdbd2fb5bf"
+        },
+        {
+          "body": {
+            "caseId": "fixture-no-quorum",
+            "confidence": 55,
+            "juror": "juror-4",
+            "nonce": "d1d94cd5d2b8547ae363de346e9a327a2264b2cb132ceeea5dde3b3bb6554962",
+            "round": 1,
+            "vote": "ans0"
+          },
+          "sig": "80d2bd32374c4f2ddbbc22d7f72df4774f1638193f01f548c0b9c0413eedece197108156ff206b3d0da3adffb9c70826f1a6abece714af50af8db29ba695fc05",
+          "signer": "54ce2e63eb9b2e58604b215fac1b4c84be566a7f96c81277cb10c3d1294af6fb"
+        }
+      ]
+    },
+    "sig": "fba9d67198b48ddbb13f7fdee0da1d0a8672ee7e01b1f13d42c7b1bf34320f85682c7212b91e92196f19ab63abe3a0dc7f1fae61dd04c1e6f1f3168b6d4f3d04",
+    "signer": "69ab5262ea626afee8df992b7c513250d78ea8613b86d12de027df387d5a39fd"
+  },
+  "transcript": [
+    {
+      "kind": "evidence",
+      "msg": {
+        "body": {
+          "caseId": "fixture-no-quorum",
+          "contentHash": "eec8e85b8066d782efd3e0d6bc185c63670deb84bcd1d1f2dc5bb3bd345cea2c",
+          "excerpt": "Two neighbors, a retired teacher and a software engineer, both reported hearing the alarm at 2 a.m. Only one of them called the building manager. The incident report does not say which one.",
+          "id": "ev-0",
+          "kind": "fetch",
+          "source": "case:context",
+          "ts": 1700000000000
+        },
+        "sig": "887dfc4ffa3c29f904d0cffef909f110fefc3842fc63fd962b749af9687c6e5ee93f5f4a1b281dba5c0a255980171606f91b33e34b89fe901b34bf7ab6cc6600",
+        "signer": "29ab401524b6efc366bd5d46fd8354d5e4a5722e1fb6e7af9f34f4aa40c3a1be"
+      },
+      "seq": 0,
+      "status": "accepted",
+      "ts": 1700000000000
+    },
+    {
+      "kind": "evidence",
+      "msg": {
+        "body": {
+          "caseId": "fixture-no-quorum",
+          "contentHash": "58391cef09dda9840885d37a9ac1dfcf250e9c926df24d14c78d26d497cf0c8f",
+          "excerpt": "Who called the building manager?",
+          "id": "ev-1",
+          "kind": "fetch",
+          "source": "case:question",
+          "ts": 1700000000000
+        },
+        "sig": "cc34c9b011818b9a7fdb374f80f9e3604bbad45120c52c3ee1d5da638e895782e6042d55a1b56f19c3e9674cc68f5a7292fc3ab44555e7a8c3577b7fc7ad9c0b",
+        "signer": "29ab401524b6efc366bd5d46fd8354d5e4a5722e1fb6e7af9f34f4aa40c3a1be"
+      },
+      "seq": 1,
+      "status": "accepted",
+      "ts": 1700000000000
+    },
+    {
+      "kind": "phase",
+      "msg": {
+        "body": {
+          "caseId": "fixture-no-quorum",
+          "phase": "attest",
+          "round": 0,
+          "ts": 1700000030000
+        },
+        "sig": "50bf4d7ecabb01cd30a570b290938eef9bbb3c109306201117ddf928506d4433f82ded33b512614ea63b725d1970c7bc50464a3a402ecc97672b20b8580b6e0d",
+        "signer": "19a0b39f1b64346c78e907d905d3ed7673c9196cf03e9d74bfbb55878bb14457"
+      },
+      "seq": 2,
+      "status": "accepted",
+      "ts": 1700000030000
+    },
+    {
+      "kind": "commit",
+      "msg": {
+        "body": {
+          "caseId": "fixture-no-quorum",
+          "commitment": "fbc2ac2c84b88e3eabfa297edb569b3a8e8f60f112e0fddaaf658397684aac5c",
+          "juror": "juror-1",
+          "round": 0
+        },
+        "sig": "2f180c50c67073b7e4c57f1c10bb2eeb7afacb59fa1faac237d79d1ebf7614cb99a412cb2ebce70c037290183fa1c0bfa4694af56e417f59b4b105988aecf300",
+        "signer": "053125fd6a5bcfb39c0d608dea2a5bec3da538583985ba98a60ff69b884cd9ca"
+      },
+      "seq": 3,
+      "status": "accepted",
+      "ts": 1700000030000
+    },
+    {
+      "kind": "commit",
+      "msg": {
+        "body": {
+          "caseId": "fixture-no-quorum",
+          "commitment": "b384b3e87d2b23be08d127d27d01109f59cefef91b98dfa4d57d96156e9bf771",
+          "juror": "juror-2",
+          "round": 0
+        },
+        "sig": "98fd94cc601ea41a4592cab9d25e02914254c2ab2d8b4d18edbd3d000da8c1280075e05373131fabd630c2df9ba6e34984ea87bd0f301c07cb6cbe3bfec8be0f",
+        "signer": "f56537c97d556dc43da4eead0d0e6c4cf73fa55f210ccf8c5b7f94387b30ad56"
+      },
+      "seq": 4,
+      "status": "accepted",
+      "ts": 1700000030000
+    },
+    {
+      "kind": "commit",
+      "msg": {
+        "body": {
+          "caseId": "fixture-no-quorum",
+          "commitment": "d83af92b14a21a448537ca092a906771042d17e9d17a8bf829368b01cac2c6d3",
+          "juror": "juror-3",
+          "round": 0
+        },
+        "sig": "538948f16fc02de618016ee534f139f00fa31864ec8ab820f27f9cae726129a6310e83d6a2f636b8dbce54a4e93f5bbcc99f1ff548e92b0f5d4218fe752d2b03",
+        "signer": "d925247dde7b497b8b4fecd82126c71e0a5b7539530b08cb97922bfdbd2fb5bf"
+      },
+      "seq": 5,
+      "status": "accepted",
+      "ts": 1700000030000
+    },
+    {
+      "kind": "commit",
+      "msg": {
+        "body": {
+          "caseId": "fixture-no-quorum",
+          "commitment": "29841dff2ec473a72365c4fcf4ed6991e4d1ad5fa995c789bc95ed8326c7e03c",
+          "juror": "juror-4",
+          "round": 0
+        },
+        "sig": "acc4515d8084ed6bc83acc9e7e07216192bf11b9343479c1be366614ba0aeebb7a7ce3e8b7f8a1c8ac28238e613536bda5807f70ce8f2462c0381b8eb769c101",
+        "signer": "54ce2e63eb9b2e58604b215fac1b4c84be566a7f96c81277cb10c3d1294af6fb"
+      },
+      "seq": 6,
+      "status": "accepted",
+      "ts": 1700000030000
+    },
+    {
+      "kind": "phase",
+      "msg": {
+        "body": {
+          "caseId": "fixture-no-quorum",
+          "phase": "commit",
+          "round": 0,
+          "ts": 1700000060000
+        },
+        "sig": "d2f94844e0cae1f934b09a2d2a70adadd70b463c2edcdc5e6647663b60decfc23e94ede137763761a3fdcd253a563b8eb15027e9e2f54c5e43f9cb3bdb319900",
+        "signer": "19a0b39f1b64346c78e907d905d3ed7673c9196cf03e9d74bfbb55878bb14457"
+      },
+      "seq": 7,
+      "status": "accepted",
+      "ts": 1700000060000
+    },
+    {
+      "kind": "reveal",
+      "msg": {
+        "body": {
+          "caseId": "fixture-no-quorum",
+          "confidence": 80,
+          "juror": "juror-1",
+          "nonce": "2eeedd1be53af8c5becaffe3a91b80261cf176e93774f9527a8dbcee345c72a2",
+          "round": 0,
+          "vote": "ans2"
+        },
+        "sig": "c41ce977437ac7bf439846d0680ee1c0352127b8339de2a71762188138e4e99a2ec3ad1ad73b216951b606121f6528cb1e7c6e6af44af0fef257579da7e0f30e",
+        "signer": "053125fd6a5bcfb39c0d608dea2a5bec3da538583985ba98a60ff69b884cd9ca"
+      },
+      "seq": 8,
+      "status": "accepted",
+      "ts": 1700000060000
+    },
+    {
+      "kind": "reveal",
+      "msg": {
+        "body": {
+          "caseId": "fixture-no-quorum",
+          "confidence": 65,
+          "juror": "juror-2",
+          "nonce": "0b74cb23ff57b3404cde19eefb11ade9de62171b0edd0291cf9f8f5d118f3db4",
+          "round": 0,
+          "vote": "ans0"
+        },
+        "sig": "e0bd77aea2b2e4853c780220e37f8addd4216271000df95bb8b4ce22e61910b277885a1367ddfb1a664976b2b1776c4359298ab6784dc22c98cd275c00605605",
+        "signer": "f56537c97d556dc43da4eead0d0e6c4cf73fa55f210ccf8c5b7f94387b30ad56"
+      },
+      "seq": 9,
+      "status": "accepted",
+      "ts": 1700000060000
+    },
+    {
+      "kind": "reveal",
+      "msg": {
+        "body": {
+          "caseId": "fixture-no-quorum",
+          "confidence": 90,
+          "juror": "juror-3",
+          "nonce": "4495a93609e0fdbd2da8b7440046a76aff2083e5ae10810f804f9efb547cfa3f",
+          "round": 0,
+          "vote": "ans2"
+        },
+        "sig": "277871671a60ff2d9a7b569107324b31d4b03777390c58c77507cff3192be9e31b84cd939491ea76e6bdec9a421c2ca2a26d70a4efa08a04ab57db8f4579cc07",
+        "signer": "d925247dde7b497b8b4fecd82126c71e0a5b7539530b08cb97922bfdbd2fb5bf"
+      },
+      "seq": 10,
+      "status": "accepted",
+      "ts": 1700000060000
+    },
+    {
+      "kind": "reveal",
+      "msg": {
+        "body": {
+          "caseId": "fixture-no-quorum",
+          "confidence": 55,
+          "juror": "juror-4",
+          "nonce": "11add6ed4a51dc981b9dc7ef1fd53b78721f697632ab867c36778e39693d7f5b",
+          "round": 0,
+          "vote": "ans0"
+        },
+        "sig": "e8ad4da2aba7ceedff34aa2a7f47354dd50bb72d0e582d4c4d6d0a346522dcfb37e0ce09565d8d7618ec4080c1aa7b382cbc1b85da44ca65620e14e525cb6104",
+        "signer": "54ce2e63eb9b2e58604b215fac1b4c84be566a7f96c81277cb10c3d1294af6fb"
+      },
+      "seq": 11,
+      "status": "accepted",
+      "ts": 1700000060000
+    },
+    {
+      "kind": "phase",
+      "msg": {
+        "body": {
+          "caseId": "fixture-no-quorum",
+          "phase": "reveal",
+          "round": 0,
+          "ts": 1700000090000
+        },
+        "sig": "d8a8c55218b2f084761732dd5ca3483c83c30ec47bc4a3d979469f90e14ed3992b794fbca2e2feec82221d443ccf92d526a2bceb9ec5ef7d713073d1734e1402",
+        "signer": "19a0b39f1b64346c78e907d905d3ed7673c9196cf03e9d74bfbb55878bb14457"
+      },
+      "seq": 12,
+      "status": "accepted",
+      "ts": 1700000090000
+    },
+    {
+      "kind": "argument",
+      "msg": {
+        "body": {
+          "caseId": "fixture-no-quorum",
+          "evidenceIds": [
+            "ev-0",
+            "ev-1"
+          ],
+          "juror": "juror-1",
+          "prevHash": "0c758ab07b785a4c19ea032519573b589d2610cd11a9a2b13164a45535cea7b5",
+          "round": 0,
+          "text": "The report leaves the caller unstated because neither neighbor is identified, so ans2 is the only supported choice."
+        },
+        "sig": "aa26ca7904dea649f0dc3c777de05528ae7a4cdaefb29db4b876e928daabc2f5b58f9d92c1e99303243405db5f8fdf6f8ae4dac5e9ec9439d7ca1213400b3704",
+        "signer": "053125fd6a5bcfb39c0d608dea2a5bec3da538583985ba98a60ff69b884cd9ca"
+      },
+      "seq": 13,
+      "status": "accepted",
+      "ts": 1700000090000
+    },
+    {
+      "kind": "argument",
+      "msg": {
+        "body": {
+          "caseId": "fixture-no-quorum",
+          "evidenceIds": [
+            "ev-0"
+          ],
+          "juror": "juror-2",
+          "prevHash": "3ff807c51b47cb28b561ff78ae08e65fc55ab6ec6849c11d8455387cfd998aff",
+          "round": 0,
+          "text": "Nothing in the context singles out either neighbor because both heard the alarm; I lean ans2 after rereading ev-0."
+        },
+        "sig": "b7688e69cafd057644af41ad11a7fff9d9cdcc90cb3d7a18deabb242d3beab5211c8427b08f6d822ce2e05be46a02ac9695092950b10d05be906fa9e1f71dc0a",
+        "signer": "f56537c97d556dc43da4eead0d0e6c4cf73fa55f210ccf8c5b7f94387b30ad56"
+      },
+      "seq": 14,
+      "status": "accepted",
+      "ts": 1700000090000
+    },
+    {
+      "kind": "argument",
+      "msg": {
+        "body": {
+          "caseId": "fixture-no-quorum",
+          "evidenceIds": [
+            "ev-0",
+            "ev-1"
+          ],
+          "juror": "juror-3",
+          "prevHash": "e00ed262ba947db787ed7590c51af01122c8409e712ad40f812672a4ba5b940f",
+          "round": 0,
+          "text": "The question cannot be resolved from ev-0 and ev-1 because the identity of the caller is withheld."
+        },
+        "sig": "6ca6f91e12ec79a54ea61a4577f727f2c159c05b3bd3a987fd0a06cae56093591c1ef89dcd5d945da8601c1b9473c16433890b460b5db07ce85785b089c21202",
+        "signer": "d925247dde7b497b8b4fecd82126c71e0a5b7539530b08cb97922bfdbd2fb5bf"
+      },
+      "seq": 15,
+      "status": "accepted",
+      "ts": 1700000090000
+    },
+    {
+      "kind": "argument",
+      "msg": {
+        "body": {
+          "caseId": "fixture-no-quorum",
+          "evidenceIds": [
+            "ev-0"
+          ],
+          "juror": "juror-4",
+          "prevHash": "0be624d3166d0758c805cec566d8af550bc25055daf2782ad2dd0d23e1b104f0",
+          "round": 0,
+          "text": "I read the ordering of the sentence as a hint, so I keep ans0 even though ev-0 does not state it."
+        },
+        "sig": "bd43f9c871bc860a8b57b1b161c3ff723ea3688751aeac2975da459793984c581825ccff934c13f9b1bde9a33706b2c36e3a8baef279af85e9724be6e7de8709",
+        "signer": "54ce2e63eb9b2e58604b215fac1b4c84be566a7f96c81277cb10c3d1294af6fb"
+      },
+      "seq": 16,
+      "status": "accepted",
+      "ts": 1700000090000
+    },
+    {
+      "kind": "phase",
+      "msg": {
+        "body": {
+          "caseId": "fixture-no-quorum",
+          "phase": "deliberate",
+          "round": 0,
+          "ts": 1700000120000
+        },
+        "sig": "179e9f18e9dead8ac1a792fa447116977c3c7d52c33f676ba7c2aeaddb6659e36a00dc15402ab8825c3335035c90a370aa623df8c35fd8c31bae4501dfaa4d05",
+        "signer": "19a0b39f1b64346c78e907d905d3ed7673c9196cf03e9d74bfbb55878bb14457"
+      },
+      "seq": 17,
+      "status": "accepted",
+      "ts": 1700000120000
+    },
+    {
+      "kind": "commit",
+      "msg": {
+        "body": {
+          "caseId": "fixture-no-quorum",
+          "commitment": "36b1cef1600e2e4fb5598eb45e8cdc3359fc12b2b7e01be11adb7e054935e761",
+          "juror": "juror-1",
+          "round": 1
+        },
+        "sig": "d87bae99bd61d25a15be1e7dea999a5445b7d5bdd627ee22d8c98e9797e801d93d0fb8c1ed6f11b2efeae52e7526112bd9b383c120866490061529d989b8e500",
+        "signer": "053125fd6a5bcfb39c0d608dea2a5bec3da538583985ba98a60ff69b884cd9ca"
+      },
+      "seq": 18,
+      "status": "accepted",
+      "ts": 1700000120000
+    },
+    {
+      "kind": "commit",
+      "msg": {
+        "body": {
+          "caseId": "fixture-no-quorum",
+          "commitment": "2d314ae7d9f9a3281239aa76adc967137573e1bcbf2254def1ed469913085326",
+          "juror": "juror-2",
+          "round": 1
+        },
+        "sig": "8c1db530df20410bebfc9b549084b5e07e6c80217fb4bb7ef91103e2e2f98899a180baf4efe0f366b7414ae220ba1f18cca393a28b1590e234ff33f8c739dd00",
+        "signer": "f56537c97d556dc43da4eead0d0e6c4cf73fa55f210ccf8c5b7f94387b30ad56"
+      },
+      "seq": 19,
+      "status": "accepted",
+      "ts": 1700000120000
+    },
+    {
+      "kind": "commit",
+      "msg": {
+        "body": {
+          "caseId": "fixture-no-quorum",
+          "commitment": "52396d8bf5da0904837be288745ce4c25a8e7c4488dc851a2b4990d4d14499d9",
+          "juror": "juror-3",
+          "round": 1
+        },
+        "sig": "422b95835acdcd968ed2d18e64920cff5c5cffa5b4a8f57476da98851ac1a7897808f4e0a467498b1b781869bdb15f9a074c6ca167ca67b7779dea5b71787601",
+        "signer": "d925247dde7b497b8b4fecd82126c71e0a5b7539530b08cb97922bfdbd2fb5bf"
+      },
+      "seq": 20,
+      "status": "accepted",
+      "ts": 1700000120000
+    },
+    {
+      "kind": "commit",
+      "msg": {
+        "body": {
+          "caseId": "fixture-no-quorum",
+          "commitment": "0ff25ab1eb2c2f3c0ac9cc916a747e79095c3a84bf6c007833f1ddd1c6aedab9",
+          "juror": "juror-4",
+          "round": 1
+        },
+        "sig": "c63c102f829c3c07918040f2fc2e44de52291c508091709e843667c7ea03ecfdc86ab0acfe79e16a61874fbddef1c54c211b9ed9ac34463197aee33d201d480e",
+        "signer": "54ce2e63eb9b2e58604b215fac1b4c84be566a7f96c81277cb10c3d1294af6fb"
+      },
+      "seq": 21,
+      "status": "accepted",
+      "ts": 1700000120000
+    },
+    {
+      "kind": "phase",
+      "msg": {
+        "body": {
+          "caseId": "fixture-no-quorum",
+          "phase": "commit",
+          "round": 1,
+          "ts": 1700000150000
+        },
+        "sig": "57303a979f73505b8e8514862e477faf957c2948ff843d0eaf2cc16562619f93c51593182543771fb7543271a7887295257a5049bf727c54a1fb86d6021b9f00",
+        "signer": "19a0b39f1b64346c78e907d905d3ed7673c9196cf03e9d74bfbb55878bb14457"
+      },
+      "seq": 22,
+      "status": "accepted",
+      "ts": 1700000150000
+    },
+    {
+      "kind": "reveal",
+      "msg": {
+        "body": {
+          "caseId": "fixture-no-quorum",
+          "confidence": 80,
+          "juror": "juror-1",
+          "nonce": "1eecc1e52009f78b9eeeea75ae93a45a764cf4ec879cd1fd0c0c0ec155612fd6",
+          "round": 1,
+          "vote": "ans2"
+        },
+        "sig": "25e213c78302dd7df3141657615a406ffe399038daa46bf66e6ec99fd401a08e62f9c63efc3766919a5c74989bed752eb2c4be095468536ac3d9ad61d4497a08",
+        "signer": "053125fd6a5bcfb39c0d608dea2a5bec3da538583985ba98a60ff69b884cd9ca"
+      },
+      "seq": 23,
+      "status": "accepted",
+      "ts": 1700000150000
+    },
+    {
+      "kind": "reveal",
+      "msg": {
+        "body": {
+          "caseId": "fixture-no-quorum",
+          "confidence": 65,
+          "juror": "juror-2",
+          "nonce": "35e671660643fdd346b25511b53f47f2b9a7ee9384dfbcd2561050dbcb0f1b0f",
+          "round": 1,
+          "vote": "ans2"
+        },
+        "sig": "35e32b9724b5ab6aeda34615d005e86c8535d2ed77324269a264202bfa7279c427795ecac16e5b489bb8dc91a8323d6895a329d9792a897ee76d4fd8d61d8c02",
+        "signer": "f56537c97d556dc43da4eead0d0e6c4cf73fa55f210ccf8c5b7f94387b30ad56"
+      },
+      "seq": 24,
+      "status": "accepted",
+      "ts": 1700000150000
+    },
+    {
+      "kind": "reveal",
+      "msg": {
+        "body": {
+          "caseId": "fixture-no-quorum",
+          "confidence": 90,
+          "juror": "juror-3",
+          "nonce": "b69d2afa8ba3b86be7effac6494565cb2d27fa9eddf4cf3cbc9b14286638ad73",
+          "round": 1,
+          "vote": "ans0"
+        },
+        "sig": "dfd2903a696a9869bda8037db05bc319e1b2ba76ea3abd2c7fd31771d38080e53c6efc5c91f2b73543e3a7ed23adbd0db348d36b661ecef9673b1ace12ffc10d",
+        "signer": "d925247dde7b497b8b4fecd82126c71e0a5b7539530b08cb97922bfdbd2fb5bf"
+      },
+      "seq": 25,
+      "status": "accepted",
+      "ts": 1700000150000
+    },
+    {
+      "kind": "reveal",
+      "msg": {
+        "body": {
+          "caseId": "fixture-no-quorum",
+          "confidence": 55,
+          "juror": "juror-4",
+          "nonce": "d1d94cd5d2b8547ae363de346e9a327a2264b2cb132ceeea5dde3b3bb6554962",
+          "round": 1,
+          "vote": "ans0"
+        },
+        "sig": "80d2bd32374c4f2ddbbc22d7f72df4774f1638193f01f548c0b9c0413eedece197108156ff206b3d0da3adffb9c70826f1a6abece714af50af8db29ba695fc05",
+        "signer": "54ce2e63eb9b2e58604b215fac1b4c84be566a7f96c81277cb10c3d1294af6fb"
+      },
+      "seq": 26,
+      "status": "accepted",
+      "ts": 1700000150000
+    },
+    {
+      "kind": "phase",
+      "msg": {
+        "body": {
+          "caseId": "fixture-no-quorum",
+          "phase": "reveal",
+          "round": 1,
+          "ts": 1700000180000
+        },
+        "sig": "a936546c7fe12036179efb12fdc34636c12003f516a3dfabf5b47037d643305bdf3f0ac56e707cd450b32f15a53a35f9d78c4ff994da48d47c94ab78c5b19901",
+        "signer": "19a0b39f1b64346c78e907d905d3ed7673c9196cf03e9d74bfbb55878bb14457"
+      },
+      "seq": 27,
+      "status": "accepted",
+      "ts": 1700000180000
+    }
+  ]
+}
