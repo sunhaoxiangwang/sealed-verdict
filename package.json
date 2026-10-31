@@ -1,0 +1,12 @@
+{
+  "name": "sealed-verdict",
+  "private": true,
+  "description": "Sealed Verdict: commit-reveal LLM juries with verifiable verdict certificates",
+  "scripts": {
+    "test:protocol": "cargo test --manifest-path packages/protocol/Cargo.toml",
+    "test:actors": "cargo test --manifest-path apps/actors/Cargo.toml",
+    "test:wasm": "node --test packages/protocol/js/verify.test.mjs",
+    "build:wasm": "pnpm --filter @sealed-verdict/protocol build:wasm",
+    "fixtures": "cargo run --manifest-path apps/actors/Cargo.toml --bin gen_fixtures -- --out packages/protocol/fixtures"
+  }
+}

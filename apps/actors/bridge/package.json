@@ -1,0 +1,16 @@
+{
+  "name": "@sealed-verdict/bridge",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Sealed Verdict live bridge: Agent Relay transport and Terse durable state around the Rust clerk daemon",
+  "scripts": {
+    "test:relay": "node --test --test-force-exit test/relay-roundtrip.mjs",
+    "test:terse": "node --test --test-force-exit test/terse-state.mjs",
+    "live": "node src/run-live.js"
+  },
+  "dependencies": {
+    "@agent-relay/sdk": "15.0.1",
+    "zod": "4.4.3"
+  }
+}

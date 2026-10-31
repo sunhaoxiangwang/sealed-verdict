@@ -1,0 +1,592 @@
+{
+  "cert": {
+    "body": {
+      "caseId": "fixture-valid",
+      "evidenceIds": [
+        "ev-0",
+        "ev-1"
+      ],
+      "quorum": {
+        "counted": 4,
+        "f": 1,
+        "n": 4,
+        "needed": 3
+      },
+      "registry": {
+        "caseId": "fixture-valid",
+        "choices": [
+          "ans0",
+          "ans1",
+          "ans2"
+        ],
+        "clerk": "6cd21978da5335c7ad6333fba6da860240f63dcadd043ba31e164b645e377c3c",
+        "condition": "C3",
+        "jurors": [
+          {
+            "id": "juror-1",
+            "pubkey": "b59a5152e88029a47af1055d17a6d74bd864bdb099e8229c4c52f6c464e9f07e"
+          },
+          {
+            "id": "juror-2",
+            "pubkey": "ff80d7b37a524db0ac096311ba41c420fe398f03dc5391d19e05ccb93f1639d3"
+          },
+          {
+            "id": "juror-3",
+            "pubkey": "c94b8af232165447f6aec434770f70981f814a55b13f56472bcaf7e8364b91a0"
+          },
+          {
+            "id": "juror-4",
+            "pubkey": "18473f4372b58b53344db12ea4889627c6dde9c29e1a5d455aa3e256aff56056"
+          }
+        ],
+        "ledger": "2ff5eefed8aaedb3ad692b5c2695bb836e094a7bd160e4ec9b1e801134ba059a",
+        "oracle": "66a5c4234351235eb4c461e724bfd2790fe5f12cf9382003d07efe907563573a"
+      },
+      "transcriptLen": 28,
+      "transcriptRoot": "012d9c3cf62d8a19fd0949bba060580177343bfba3def8f016f0833fcbcf347b",
+      "verdict": "ans2",
+      "votes": [
+        {
+          "body": {
+            "caseId": "fixture-valid",
+            "confidence": 80,
+            "juror": "juror-1",
+            "nonce": "6537f6818b23cfcf86d037f360cebc9292dbe3bd4ba81881f04507171ecf45a6",
+            "round": 1,
+            "vote": "ans2"
+          },
+          "sig": "3ca4d5ab501414428e3200fa2bf92194a84bca107023b65b3b96bbbeeb5972ea9b5505bd6877f5a0e99fa4e402a3e962b92afb493c741dbb435705480cd9370c",
+          "signer": "b59a5152e88029a47af1055d17a6d74bd864bdb099e8229c4c52f6c464e9f07e"
+        },
+        {
+          "body": {
+            "caseId": "fixture-valid",
+            "confidence": 65,
+            "juror": "juror-2",
+            "nonce": "1b571fff98d303c131556326be856f26bf191fb315fae8a368540345f82e8c7b",
+            "round": 1,
+            "vote": "ans2"
+          },
+          "sig": "840d8cb25f700ae6b463b11d9983a7f44cb2de33299a0c9812cc9c288c2b48dd6e541561807218b52b14ef58e68e3bd52b63cd2ed74197b10da70eebaed2f904",
+          "signer": "ff80d7b37a524db0ac096311ba41c420fe398f03dc5391d19e05ccb93f1639d3"
+        },
+        {
+          "body": {
+            "caseId": "fixture-valid",
+            "confidence": 90,
+            "juror": "juror-3",
+            "nonce": "dd752521b70534d19fd54d3604fd3c95b91c2903029dbb83043006f7d566fcc0",
+            "round": 1,
+            "vote": "ans2"
+          },
+          "sig": "a05ffcb57d1d50bd4812bb3b8bdd94504b18670704b80ef05ad2f4611c43807b2ccfae2b72f3496e5c08dd80c4da82a64afda17419f2d026d80edf792816eb0d",
+          "signer": "c94b8af232165447f6aec434770f70981f814a55b13f56472bcaf7e8364b91a0"
+        },
+        {
+          "body": {
+            "caseId": "fixture-valid",
+            "confidence": 55,
+            "juror": "juror-4",
+            "nonce": "6cd4ff5abdfd3eec8955e481401ab7f423b101e34203b26f2e57d2c707b7ccf4",
+            "round": 1,
+            "vote": "ans0"
+          },
+          "sig": "3484bb1a90037244e8c6db9106b90a80e0e44fa7c0343b034fbea121cc18af633ff3f6c81d8af9d44ab11617346220ae8ee9b422d98014a81920412d2e4f0c0e",
+          "signer": "18473f4372b58b53344db12ea4889627c6dde9c29e1a5d455aa3e256aff56056"
+        }
+      ]
+    },
+    "sig": "ade213c1c5c091f38a3c12ce83dd12935f7441771f42c833e864031724b24afc6f78c8dc7d5ef50a625fdfc3cca3cdd9a2cff5d19d338a405d9515da9925d102",
+    "signer": "2ff5eefed8aaedb3ad692b5c2695bb836e094a7bd160e4ec9b1e801134ba059a"
+  },
+  "transcript": [
+    {
+      "kind": "evidence",
+      "msg": {
+        "body": {
+          "caseId": "fixture-valid",
+          "contentHash": "eec8e85b8066d782efd3e0d6bc185c63670deb84bcd1d1f2dc5bb3bd345cea2c",
+          "excerpt": "Two neighbors, a retired teacher and a software engineer, both reported hearing the alarm at 2 a.m. Only one of them called the building manager. The incident report does not say which one.",
+          "id": "ev-0",
+          "kind": "fetch",
+          "source": "case:context",
+          "ts": 1700000000000
+        },
+        "sig": "23bf0f01b58f11028c4cd0c252c3555c841ed4172956b208bddc90792d34ca3571fa644f29bc11107c18739f9d9404a150d25c82be5346bd8aa5f47fa5ce1002",
+        "signer": "66a5c4234351235eb4c461e724bfd2790fe5f12cf9382003d07efe907563573a"
+      },
+      "seq": 0,
+      "status": "accepted",
+      "ts": 1700000000000
+    },
+    {
+      "kind": "evidence",
+      "msg": {
+        "body": {
+          "caseId": "fixture-valid",
+          "contentHash": "58391cef09dda9840885d37a9ac1dfcf250e9c926df24d14c78d26d497cf0c8f",
+          "excerpt": "Who called the building manager?",
+          "id": "ev-1",
+          "kind": "fetch",
+          "source": "case:question",
+          "ts": 1700000000000
+        },
+        "sig": "ed2e89db37ceaa1b6b03ac5fbc9b622ea52a62ed3a299c0b39a34eaf00d3eb064a4a76cfd1e4cfd951d8b99e54b00320132e1af842f3f78fbaf9ce2012d90507",
+        "signer": "66a5c4234351235eb4c461e724bfd2790fe5f12cf9382003d07efe907563573a"
+      },
+      "seq": 1,
+      "status": "accepted",
+      "ts": 1700000000000
+    },
+    {
+      "kind": "phase",
+      "msg": {
+        "body": {
+          "caseId": "fixture-valid",
+          "phase": "attest",
+          "round": 0,
+          "ts": 1700000030000
+        },
+        "sig": "6ce2e6ad6bc3f57d4f0bce66458132bba88b9b174c0b830ba099ed91ff8c16d0e8a008baf4b81ec574b105d6396c00f7b3e9ef87da1f8a44279f6782c7ce5802",
+        "signer": "6cd21978da5335c7ad6333fba6da860240f63dcadd043ba31e164b645e377c3c"
+      },
+      "seq": 2,
+      "status": "accepted",
+      "ts": 1700000030000
+    },
+    {
+      "kind": "commit",
+      "msg": {
+        "body": {
+          "caseId": "fixture-valid",
+          "commitment": "ec253cc24b2179e5dedae007de04d38f3705e81ef2e6d2124090ac1b2c5b0a3c",
+          "juror": "juror-1",
+          "round": 0
+        },
+        "sig": "586a10ac5ea9f7a89386ad9a00ca2a9d6da2a5fea312bc481d907ce4f9db98e4fc4f8ba032414917e2968a5b6aca52a4e6cd917be6f4a50fd69cea7dc6639307",
+        "signer": "b59a5152e88029a47af1055d17a6d74bd864bdb099e8229c4c52f6c464e9f07e"
+      },
+      "seq": 3,
+      "status": "accepted",
+      "ts": 1700000030000
+    },
+    {
+      "kind": "commit",
+      "msg": {
+        "body": {
+          "caseId": "fixture-valid",
+          "commitment": "410cffc4a46229d06fe14ab88e429aa98510e2a025cf894854d17c391e982e1d",
+          "juror": "juror-2",
+          "round": 0
+        },
+        "sig": "01956bc069d09992f5d54b7e242a7275a2d7069a9ee97334bbc9adf43b0f5e18c4a6b12a84e120e9115b22d457c24832f61ecef9003cd500c50343fae4699d0c",
+        "signer": "ff80d7b37a524db0ac096311ba41c420fe398f03dc5391d19e05ccb93f1639d3"
+      },
+      "seq": 4,
+      "status": "accepted",
+      "ts": 1700000030000
+    },
+    {
+      "kind": "commit",
+      "msg": {
+        "body": {
+          "caseId": "fixture-valid",
+          "commitment": "3d383f19bb4a6912fb951c8031e575d5ea8f80e02c3eceb46357a032313b01a2",
+          "juror": "juror-3",
+          "round": 0
+        },
+        "sig": "9bc8338d4ce75086c8cd38b4ebf169933c76f575ee4d4feb26d2e95f0f790a1f099637bdc1c7adbdc0934937355be172db30f85afcf41b11319601721b904102",
+        "signer": "c94b8af232165447f6aec434770f70981f814a55b13f56472bcaf7e8364b91a0"
+      },
+      "seq": 5,
+      "status": "accepted",
+      "ts": 1700000030000
+    },
+    {
+      "kind": "commit",
+      "msg": {
+        "body": {
+          "caseId": "fixture-valid",
+          "commitment": "c32e22f8c37f3e6d4bc21d535ded22e381942174cf5a36336f06c8d307ff446c",
+          "juror": "juror-4",
+          "round": 0
+        },
+        "sig": "55baa62ac22d2e8efa39447fa16c7a68f803ced25d57712e1f0e0b586767adb6fe65e42850adb8e8ce5bab4097cfe5aa4db8b7b4cc2f3b5e016f621c8e883b04",
+        "signer": "18473f4372b58b53344db12ea4889627c6dde9c29e1a5d455aa3e256aff56056"
+      },
+      "seq": 6,
+      "status": "accepted",
+      "ts": 1700000030000
+    },
+    {
+      "kind": "phase",
+      "msg": {
+        "body": {
+          "caseId": "fixture-valid",
+          "phase": "commit",
+          "round": 0,
+          "ts": 1700000060000
+        },
+        "sig": "bf89ab72a1d1cc5b01329c49010211555674358fc78b4be85508eec3c089cf948d6acb3f09219326cdec8091d6b301b67f06e22c113c05d3c2126fd984f6d807",
+        "signer": "6cd21978da5335c7ad6333fba6da860240f63dcadd043ba31e164b645e377c3c"
+      },
+      "seq": 7,
+      "status": "accepted",
+      "ts": 1700000060000
+    },
+    {
+      "kind": "reveal",
+      "msg": {
+        "body": {
+          "caseId": "fixture-valid",
+          "confidence": 80,
+          "juror": "juror-1",
+          "nonce": "a786550eb5dd0ab38bbf63ef4f0bebd60e49aa97747d98858796f038a4b6235e",
+          "round": 0,
+          "vote": "ans2"
+        },
+        "sig": "4a92e8991b7f30657fa6ce9aa318451db4c03db699b89c8047bc301c1fe6f205944711e1d4220009d9220ac5139edc681903340bfead0592ab4460da97e5be00",
+        "signer": "b59a5152e88029a47af1055d17a6d74bd864bdb099e8229c4c52f6c464e9f07e"
+      },
+      "seq": 8,
+      "status": "accepted",
+      "ts": 1700000060000
+    },
+    {
+      "kind": "reveal",
+      "msg": {
+        "body": {
+          "caseId": "fixture-valid",
+          "confidence": 65,
+          "juror": "juror-2",
+          "nonce": "d443e24b3c3d8e7f566ef4b710c69f1b1f9ce6ab4cf90c9b26bcc513f0e821ba",
+          "round": 0,
+          "vote": "ans0"
+        },
+        "sig": "e0a042ac51d2ab32502f089369c01b962ce37ae6d8dea3b136e70db4a35c1859a934ec321c815726c55e1b4b462c52544fb2e11dad9c3f22d7969ee880a2d005",
+        "signer": "ff80d7b37a524db0ac096311ba41c420fe398f03dc5391d19e05ccb93f1639d3"
+      },
+      "seq": 9,
+      "status": "accepted",
+      "ts": 1700000060000
+    },
+    {
+      "kind": "reveal",
+      "msg": {
+        "body": {
+          "caseId": "fixture-valid",
+          "confidence": 90,
+          "juror": "juror-3",
+          "nonce": "bee20ffe35baa0dbba09593dee635e5667414341c595017b6c3ca3e2ccc53461",
+          "round": 0,
+          "vote": "ans2"
+        },
+        "sig": "7f238f54ec0c7fb066354ec927f6f5638fe2447b1d332973e1072b32fe7e79fb431d85770b88b561e912816b206892d65d6d4eff0f97dde9a6afbc0eb9be250e",
+        "signer": "c94b8af232165447f6aec434770f70981f814a55b13f56472bcaf7e8364b91a0"
+      },
+      "seq": 10,
+      "status": "accepted",
+      "ts": 1700000060000
+    },
+    {
+      "kind": "reveal",
+      "msg": {
+        "body": {
+          "caseId": "fixture-valid",
+          "confidence": 55,
+          "juror": "juror-4",
+          "nonce": "b19355bd023d16253ff3bd7ff87b8b0f25d1b7e775e6c734f66308ff8c0e9310",
+          "round": 0,
+          "vote": "ans0"
+        },
+        "sig": "d8e6781911476b90539faecfc3948aa560088c88e03f7e6208fb71c0e7fbc37050c9255228ac8a18e0be6712abe6f7a9c3a50379c0126257de67d5729ba18d06",
+        "signer": "18473f4372b58b53344db12ea4889627c6dde9c29e1a5d455aa3e256aff56056"
+      },
+      "seq": 11,
+      "status": "accepted",
+      "ts": 1700000060000
+    },
+    {
+      "kind": "phase",
+      "msg": {
+        "body": {
+          "caseId": "fixture-valid",
+          "phase": "reveal",
+          "round": 0,
+          "ts": 1700000090000
+        },
+        "sig": "a26b56e49df8d82b398f6872dfb71d1ee07649bf6a98f112ba45cda6725b3ec889dc66800228acddbcb6d4212901c98d8b01493f62a80d74c7f4af6474f0e703",
+        "signer": "6cd21978da5335c7ad6333fba6da860240f63dcadd043ba31e164b645e377c3c"
+      },
+      "seq": 12,
+      "status": "accepted",
+      "ts": 1700000090000
+    },
+    {
+      "kind": "argument",
+      "msg": {
+        "body": {
+          "caseId": "fixture-valid",
+          "evidenceIds": [
+            "ev-0",
+            "ev-1"
+          ],
+          "juror": "juror-1",
+          "prevHash": "96c79aa36c017e6a00d6dbd2701585e2a44c7dce75858213a168011de8fb127d",
+          "round": 0,
+          "text": "The report leaves the caller unstated unless neither neighbor is identified, so ans2 is the only supported choice."
+        },
+        "sig": "7dc9306dd209e79af95a67e93794a33dc6cbc6d4fde5aa1aee6a683b8353b300bad0b8710c33ff875c347cc0f8f5813733672976d7570b0530c1d7ecdbc90909",
+        "signer": "b59a5152e88029a47af1055d17a6d74bd864bdb099e8229c4c52f6c464e9f07e"
+      },
+      "seq": 13,
+      "status": "accepted",
+      "ts": 1700000090000
+    },
+    {
+      "kind": "argument",
+      "msg": {
+        "body": {
+          "caseId": "fixture-valid",
+          "evidenceIds": [
+            "ev-0"
+          ],
+          "juror": "juror-2",
+          "prevHash": "e89834b876b61d6b94e0531ba9fd1133d55591dcfc0a3611f75834ad322c2c23",
+          "round": 0,
+          "text": "Nothing in the context singles out either neighbor because both heard the alarm; I lean ans2 after rereading ev-0."
+        },
+        "sig": "74a90bd5080d959326aa9029690d11afc94622f18cba2ab827fcac49b94de1dbaf0d3fa36065742568adf21b6ef8b8ee709b7ed6141651cfe321e0c253e4360d",
+        "signer": "ff80d7b37a524db0ac096311ba41c420fe398f03dc5391d19e05ccb93f1639d3"
+      },
+      "seq": 14,
+      "status": "accepted",
+      "ts": 1700000090000
+    },
+    {
+      "kind": "argument",
+      "msg": {
+        "body": {
+          "caseId": "fixture-valid",
+          "evidenceIds": [
+            "ev-0",
+            "ev-1"
+          ],
+          "juror": "juror-3",
+          "prevHash": "98ba86685a1692a6654a471461fb627a15cdb50ee72bb5b5fbe8ef9219600934",
+          "round": 0,
+          "text": "The question cannot be resolved from ev-0 and ev-1 because the identity of the caller is withheld."
+        },
+        "sig": "058bd292cfb676f81d6220852fd0546ab7e293c01340a20cf025feecf2387a1679db6b237e07504fb5a35d034a0e2f76e7c8587f059488de49a7b96b820b7a0a",
+        "signer": "c94b8af232165447f6aec434770f70981f814a55b13f56472bcaf7e8364b91a0"
+      },
+      "seq": 15,
+      "status": "accepted",
+      "ts": 1700000090000
+    },
+    {
+      "kind": "argument",
+      "msg": {
+        "body": {
+          "caseId": "fixture-valid",
+          "evidenceIds": [
+            "ev-0"
+          ],
+          "juror": "juror-4",
+          "prevHash": "1e9621631b18f2f35e6707eaff96f733eb2e95397b2e74ee28c00295be0319ea",
+          "round": 0,
+          "text": "I read the ordering of the sentence as a hint, so I keep ans0 even though ev-0 does not state it."
+        },
+        "sig": "a376fe212a9494018c6a8aa1779ce8a994c8df484d7539b1d9e7eb095794ce18353f5f572851d16cf89016009c9f9c8c2a7f8f28f1a4adfbe68dc0d3b97f5705",
+        "signer": "18473f4372b58b53344db12ea4889627c6dde9c29e1a5d455aa3e256aff56056"
+      },
+      "seq": 16,
+      "status": "accepted",
+      "ts": 1700000090000
+    },
+    {
+      "kind": "phase",
+      "msg": {
+        "body": {
+          "caseId": "fixture-valid",
+          "phase": "deliberate",
+          "round": 0,
+          "ts": 1700000120000
+        },
+        "sig": "e67a86ed3c31f0331dc9d61da592f5320ee9236570fa73d2cee5b0b78060f31b99ed32341ed67869199169fa454ba73e484599c41127db4b09e732d711b5680e",
+        "signer": "6cd21978da5335c7ad6333fba6da860240f63dcadd043ba31e164b645e377c3c"
+      },
+      "seq": 17,
+      "status": "accepted",
+      "ts": 1700000120000
+    },
+    {
+      "kind": "commit",
+      "msg": {
+        "body": {
+          "caseId": "fixture-valid",
+          "commitment": "93efdee3dc4b58e88f8224faa994cfaefb96db9c139371e78dd262d613af8121",
+          "juror": "juror-1",
+          "round": 1
+        },
+        "sig": "e989b46407a73514b6645e475ebf65f2b93e6ef4e116022b414cbaa6bcc0decac331f9cc18edfc5552e004ba18775133338f59d96f8a4aa4766a1ab24e3cb80d",
+        "signer": "b59a5152e88029a47af1055d17a6d74bd864bdb099e8229c4c52f6c464e9f07e"
+      },
+      "seq": 18,
+      "status": "accepted",
+      "ts": 1700000120000
+    },
+    {
+      "kind": "commit",
+      "msg": {
+        "body": {
+          "caseId": "fixture-valid",
+          "commitment": "65af4b878aa8556c3c78bb5494074e57bb60ab4ff55d7925c87d61afcd49dc43",
+          "juror": "juror-2",
+          "round": 1
+        },
+        "sig": "65940a7583c6cb1e72d804668e8e4de68122f6c06bd4a4d9c8960b51f7d74111b81df4a02d8862ac742f9011a43813901df4dce4a559b69b97654d5f38ab9904",
+        "signer": "ff80d7b37a524db0ac096311ba41c420fe398f03dc5391d19e05ccb93f1639d3"
+      },
+      "seq": 19,
+      "status": "accepted",
+      "ts": 1700000120000
+    },
+    {
+      "kind": "commit",
+      "msg": {
+        "body": {
+          "caseId": "fixture-valid",
+          "commitment": "d0d8fb996d998dc4c65f54d5cc4afbf146ed080e5a85d7524d225015c15f1025",
+          "juror": "juror-3",
+          "round": 1
+        },
+        "sig": "d70ca987034de868909920f8e4b9a6e584c123dfb980a94bb8f3202d20f5fd3d9b23fc7f2142a984c0918e0f6ddc089a137425411545b76ec760b264793d2f09",
+        "signer": "c94b8af232165447f6aec434770f70981f814a55b13f56472bcaf7e8364b91a0"
+      },
+      "seq": 20,
+      "status": "accepted",
+      "ts": 1700000120000
+    },
+    {
+      "kind": "commit",
+      "msg": {
+        "body": {
+          "caseId": "fixture-valid",
+          "commitment": "c322893fc3637a1cf9bbe850de5704a35f97a732dbea8c4a6abe0a0923cbfb60",
+          "juror": "juror-4",
+          "round": 1
+        },
+        "sig": "bf4066474f10e4fa379c2f41569ae8692298bead1560fddd2af61bf3b65974994d19e50ede36c409448f34637e40b5590f694c289497daf1b479d1f6e7423c0e",
+        "signer": "18473f4372b58b53344db12ea4889627c6dde9c29e1a5d455aa3e256aff56056"
+      },
+      "seq": 21,
+      "status": "accepted",
+      "ts": 1700000120000
+    },
+    {
+      "kind": "phase",
+      "msg": {
+        "body": {
+          "caseId": "fixture-valid",
+          "phase": "commit",
+          "round": 1,
+          "ts": 1700000150000
+        },
+        "sig": "eae936cfe05b29f012a05d13f9acdd9bebdb2bafe07d6e72ca076996fec76420171a6102a364bdcd9d01bf4919799e985cc3b8383b141d31925658dfb8d71a03",
+        "signer": "6cd21978da5335c7ad6333fba6da860240f63dcadd043ba31e164b645e377c3c"
+      },
+      "seq": 22,
+      "status": "accepted",
+      "ts": 1700000150000
+    },
+    {
+      "kind": "reveal",
+      "msg": {
+        "body": {
+          "caseId": "fixture-valid",
+          "confidence": 80,
+          "juror": "juror-1",
+          "nonce": "6537f6818b23cfcf86d037f360cebc9292dbe3bd4ba81881f04507171ecf45a6",
+          "round": 1,
+          "vote": "ans2"
+        },
+        "sig": "3ca4d5ab501414428e3200fa2bf92194a84bca107023b65b3b96bbbeeb5972ea9b5505bd6877f5a0e99fa4e402a3e962b92afb493c741dbb435705480cd9370c",
+        "signer": "b59a5152e88029a47af1055d17a6d74bd864bdb099e8229c4c52f6c464e9f07e"
+      },
+      "seq": 23,
+      "status": "accepted",
+      "ts": 1700000150000
+    },
+    {
+      "kind": "reveal",
+      "msg": {
+        "body": {
+          "caseId": "fixture-valid",
+          "confidence": 65,
+          "juror": "juror-2",
+          "nonce": "1b571fff98d303c131556326be856f26bf191fb315fae8a368540345f82e8c7b",
+          "round": 1,
+          "vote": "ans2"
+        },
+        "sig": "840d8cb25f700ae6b463b11d9983a7f44cb2de33299a0c9812cc9c288c2b48dd6e541561807218b52b14ef58e68e3bd52b63cd2ed74197b10da70eebaed2f904",
+        "signer": "ff80d7b37a524db0ac096311ba41c420fe398f03dc5391d19e05ccb93f1639d3"
+      },
+      "seq": 24,
+      "status": "accepted",
+      "ts": 1700000150000
+    },
+    {
+      "kind": "reveal",
+      "msg": {
+        "body": {
+          "caseId": "fixture-valid",
+          "confidence": 90,
+          "juror": "juror-3",
+          "nonce": "dd752521b70534d19fd54d3604fd3c95b91c2903029dbb83043006f7d566fcc0",
+          "round": 1,
+          "vote": "ans2"
+        },
+        "sig": "a05ffcb57d1d50bd4812bb3b8bdd94504b18670704b80ef05ad2f4611c43807b2ccfae2b72f3496e5c08dd80c4da82a64afda17419f2d026d80edf792816eb0d",
+        "signer": "c94b8af232165447f6aec434770f70981f814a55b13f56472bcaf7e8364b91a0"
+      },
+      "seq": 25,
+      "status": "accepted",
+      "ts": 1700000150000
+    },
+    {
+      "kind": "reveal",
+      "msg": {
+        "body": {
+          "caseId": "fixture-valid",
+          "confidence": 55,
+          "juror": "juror-4",
+          "nonce": "6cd4ff5abdfd3eec8955e481401ab7f423b101e34203b26f2e57d2c707b7ccf4",
+          "round": 1,
+          "vote": "ans0"
+        },
+        "sig": "3484bb1a90037244e8c6db9106b90a80e0e44fa7c0343b034fbea121cc18af633ff3f6c81d8af9d44ab11617346220ae8ee9b422d98014a81920412d2e4f0c0e",
+        "signer": "18473f4372b58b53344db12ea4889627c6dde9c29e1a5d455aa3e256aff56056"
+      },
+      "seq": 26,
+      "status": "accepted",
+      "ts": 1700000150000
+    },
+    {
+      "kind": "phase",
+      "msg": {
+        "body": {
+          "caseId": "fixture-valid",
+          "phase": "reveal",
+          "round": 1,
+          "ts": 1700000180000
+        },
+        "sig": "8941aabeb5b86f9c0c67c1b34de607b6dcec4e256caf94f74d54096af8b0ac1cb6e2a8e59ce5327862ad0e56d258cb438be6a0d7f9cfa9288290cee3968b7006",
+        "signer": "6cd21978da5335c7ad6333fba6da860240f63dcadd043ba31e164b645e377c3c"
+      },
+      "seq": 27,
+      "status": "accepted",
+      "ts": 1700000180000
+    }
+  ]
+}

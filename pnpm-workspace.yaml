@@ -1,0 +1,6 @@
+packages:
+  - "packages/*"
+  - "apps/*"
+  - "apps/actors/bridge"
+minimumReleaseAgeExclude:
+  - "@agent-relay/sdk@15.0.1"

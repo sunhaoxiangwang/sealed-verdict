@@ -1,0 +1,16 @@
+{
+  "no_quorum_cert.json": {
+    "failures": [],
+    "valid": true
+  },
+  "tampered_cert.json": {
+    "failures": [
+      "TRANSCRIPT_ROOT_MISMATCH: recomputed 08f4155425942c23d20cb36006cff8876ccb49719a731d727cfa67fc89876fa8"
+    ],
+    "valid": false
+  },
+  "valid_cert.json": {
+    "failures": [],
+    "valid": true
+  }
+}

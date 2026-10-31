@@ -1,0 +1,21 @@
+{
+  "name": "@sealed-verdict/protocol",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Sealed Verdict shared verifier as WebAssembly: await init(), then verifyCert(cert) -> { valid, failures }",
+  "type": "module",
+  "exports": {
+    ".": "./js/index.js",
+    "./node": "./js/node.js",
+    "./wasm/*": "./wasm/pkg/*"
+  },
+  "files": [
+    "js",
+    "wasm/pkg",
+    "fixtures"
+  ],
+  "scripts": {
+    "build:wasm": "cargo build --release --target wasm32-unknown-unknown --manifest-path wasm/Cargo.toml && wasm-bindgen --target web --out-dir wasm/pkg --out-name sealed_verdict_protocol wasm/target/wasm32-unknown-unknown/release/sealed_verdict_protocol_wasm.wasm && rm -f wasm/pkg/.gitignore",
+    "test": "node --test js/verify.test.mjs"
+  }
+}
