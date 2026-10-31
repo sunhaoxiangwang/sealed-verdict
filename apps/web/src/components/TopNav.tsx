@@ -3,8 +3,6 @@ import { useTribunal } from "../store/tribunal";
 
 const LINKS = [
   { to: "/courtroom", label: "Courtroom" },
-  { to: "/results", label: "Results" },
-  { to: "/replay", label: "Replay" },
   { to: "/certificate", label: "Certificate" },
 ];
 

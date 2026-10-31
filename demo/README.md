@@ -1,5 +1,10 @@
 # demo/: the AML case-review demo and eval, in Rust
 
+For the connected live demo, use **`pnpm demo:live` from the repository root**
+and open http://localhost:8090. See the root README's Live AML section.
+`live/` uses real provider calls, Relay, Terse and the canonical Rust protocol.
+The commands below are the separate legacy synthetic evaluation harness.
+
 Runs each alert through the six stages of `Sealed Verdict AML Case Review.md` (alert, L1 triage, investigation and RFI, panel, four-eyes, lookback) under the same C0 to C5 ladder as the BBQ eval. Then it scores the results.
 
 ```bash

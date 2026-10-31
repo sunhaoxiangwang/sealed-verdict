@@ -3,10 +3,16 @@ import { auditTranscript, type AuditRow } from "../protocol/audit";
 import { load, player, tamperTranscript } from "../mock/player";
 import { useTribunal } from "../store/tribunal";
 import "../styles/certificate.css";
+import LiveCertificate from "./LiveCertificate";
 
 const short = (h: string, n = 10) => (h.length > n * 2 + 1 ? `${h.slice(0, n)}…${h.slice(-n)}` : h);
 
 export default function Certificate() {
+  const source = useTribunal(s => s.source);
+  return source === "live" ? <LiveCertificate /> : <LegacyCertificate />;
+}
+
+function LegacyCertificate() {
   const cert = useTribunal((s) => s.certificate);
   const certSigned = useTribunal((s) => s.certSigned);
   const claim = useTribunal((s) => s.claim);

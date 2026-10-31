@@ -41,3 +41,12 @@ export function verify(signed: Signed<unknown>, pub: string): boolean {
 export const chainHash = (prevHash: string, body: unknown): string => sha256hex(prevHash + canonical(body));
 
 export const GENESIS = sha256hex("sealed-verdict:genesis");
+
+// Rust sv1 wire signatures use domain-separated canonical bytes, with hex signatures.
+export function verifyWire(kind: string, msg: Signed<unknown>, authorizedKey: string | undefined): boolean {
+  try {
+    return !!authorizedKey && msg.signer === authorizedKey && ed.verify(
+      hexToBytes(msg.sig), utf8ToBytes(`sv1/${kind}\n${canonical(msg.body)}`), hexToBytes(authorizedKey),
+    );
+  } catch { return false; }
+}

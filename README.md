@@ -1,5 +1,55 @@
 # Sealed Verdict
 
+## Live AML demo (real providers, Relay, hosted Terse, Rust, browser)
+
+Run `pnpm demo:setup` once, then `pnpm demo:live` and open
+**http://localhost:8090**. Click **Run AML case**, then **Certificate** →
+**Verify with Rust/WASM**. `pnpm demo:check` verifies the completed run and
+confirms that editing an argument breaks verification.
+
+Keys are read server-side from `.env`: `OPENAI_API_KEY`, `GEMINI_API_KEY`,
+`ANTHROPIC_API_KEY`, `TERSE_API_KEY`. Set `TERSE_ACTOR_URL` to your deployed
+CaseActor endpoint; a machine-specific `.env.live` may hold that endpoint.
+Without a hosted endpoint the launcher starts the real local Terse runtime.
+Relay runs locally unless `RELAY_BASE_URL` and `RELAY_WORKSPACE_KEY` are set.
+
+The input is [a real public DOJ AML case](demo/data/td-bank-public-case.json):
+TD Bank's nominee-account cash network. It contains sourced aggregate facts,
+not synthetic transactions or private bank records. Python calls OpenAI for
+triage, Gemini for investigation/RFI gaps, and a four-juror panel spanning
+OpenAI, Gemini and Anthropic. Every panel message travels through Relay;
+the Rust Clerk admits it and Terse persists it. Phases close when all required
+messages are admitted, or at the deadline. The browser reads persisted state
+and verifies the original bundle with the Rust WASM verifier. Failed API calls
+stop the run; no mock fallback exists. Human review remains pending and no SAR
+is filed. Existing synthetic experiments remain separate from this demo.
+
+Defaults: `gpt-5-mini`, `gemini-3.5-flash-lite`, `claude-haiku-4-5-20251001`.
+Override with `OPENAI_MODEL`, `GEMINI_MODEL`, `ANTHROPIC_MODEL`.
+
+For **SuperServe**, install its CLI (`curl -fsSL https://superserve.ai/install | sh`),
+set `SUPERSERVE_API_KEY` in `.env` (or run `superserve login`), then
+`pnpm demo:superserve`. A repository-local install
+at `.runtime/bin/superserve` is also supported. The deployment command packages
+the app, builds its Rust executable and frontend in a new sandbox, passes only the required
+runtime environment, and publishes port 8090 privately. It prints the command
+to open a signed browser URL. A hosted Terse endpoint is required. See the
+[official CLI documentation](https://docs.superserve.ai/cli) for authentication.
+
+**Supabase location:** the private Storage bucket `sealed-verdict` in your
+`VITE_SUPABASE_URL` project. `cases/<caseId>.json` contains the completed case,
+original certificate, transcript and provider metadata; `latest.json` makes
+the last completed case available immediately after a fresh deployment.
+The backend uses `SUPABASE_API_KEY`; the browser reads through `/api/aml` and
+never receives that secret. Terse remains the live protocol state; Supabase
+archives completed cases. No public storage policy or database migration is
+needed. `VITE_SUPABASE_ANON_KEY` is the public client credential, not a server key.
+
+**SuperServe location:** a sandbox named `sealed-verdict-<runId>`, with the
+application in `/home/user/sealed-verdict` and the workflow server listening on
+port 8090. Only its private preview port is published. The sandbox pauses
+after one hour; resume it with `superserve sandbox resume <name>`.
+
 Multi-agent debate makes LLM bias worse: jurors read each other and herd. Sealed
 Verdict runs LLM jurors as a tribunal under a commit-reveal protocol, carries
 every message over Agent Relay, keeps each case's state in a Terse durable
