@@ -59,7 +59,7 @@ the results page until they land.
 | `packages/protocol/` | Rust wire types, canonical encoding, Ed25519 signing, commitments, transcript chain, admission engine, certificate verifier, WASM build and JS glue, public fixtures | Leo |
 | `apps/actors/` | Rust Clerk, Ledger, Oracle, juror signing shell, scripted runner, live `clerk_daemon`; `bridge/` Node glue for Agent Relay transport, sealed intents, and the Terse case actor | Leo |
 | `apps/jurors/` | LLM jurors on Agent Relay for conditions C2 to C5: TypeScript runner, CLI, Python entry point, quickstart and permission probe | Rikin |
-| `eval/` | Preregistered benchmark: data preparation, C0/C1 baselines, jury runs, scorer, plots, spec | Chengyao (data science) |
+| `eval/` | Preregistered benchmark: data preparation, C0/C1 baselines, jury runs, scorer, plots, spec | Cheng Yao Lee (data science) |
 | `apps/web/` | Courtroom, certificate verify/tamper page, C2-vs-C5 replay, results ladder | Dan (frontend) |
 | `docs/` | `core.md` protocol specification and known limits, `handoff.md` backend handoff | Leo |
 
