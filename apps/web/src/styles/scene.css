@@ -1,0 +1,5 @@
+.scene-canvas { position: absolute; inset: 0; }
+.nameplate { display: flex; align-items: center; gap: 6px; padding: 3px 8px; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.04em; color: var(--parchment); background: rgba(11, 10, 13, 0.55); border: 1px solid var(--brass-2); border-radius: 4px; white-space: nowrap; user-select: none; }
+.nameplate-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--verified); box-shadow: 0 0 6px var(--verified); }
+.nameplate-persona { color: var(--ink-dim); }
+.nameplate-persona:not(:empty)::before { content: "· "; }
