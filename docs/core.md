@@ -376,16 +376,19 @@ randomness.
 
 | Actor | Methods |
 | --- | --- |
-| `Clerk` | `open_case(registry, keypair, clock, phase_timeout_ms)`, `phase(case_id) -> Option<PhaseInfo>`, `submit_evidence`, `submit_commit`, `submit_reveal`, `submit_argument`, `tick`, `close_phase`, `issue_verdict -> VerdictCert` |
-| `Ledger` | `append(kind, msg, admission)`, `root_hex`, `len`, `entries`, `certify(body) -> Signed<CertBody>` |
-| `Oracle` | `fetch(src) -> Signed<Evidence>`, only for sources in the supplied case context |
-| `JurorShell` | `commit(round, vote, confidence)`, `reveal(round)`, `argue(round, text, evidence_ids, prev_hash)` |
-| runner | `run_case(&CaseScript) -> CaseRun { cert, report, tally }`, `write_case(out_dir, &cert)` |
+| `Clerk` | `open_case(registry, keypair, clock, phase_timeout_ms)`, `phase(case_id) -> Option<PhaseInfo { phase, round, deadline_ms, closed }>`, `submit(ledger, kind, value)` plus `submit_evidence` / `submit_commit` / `submit_reveal` / `submit_argument(ledger, value)` and typed wrappers `attest` / `commit` / `reveal` / `argue(ledger, &Signed<T>)`, all returning `Result<Admission, ActorError>`; `tick(ledger) -> Result<bool>` closes the phase once the deadline has passed; `close_phase(ledger) -> Result<PhaseMarker>`; `tally()`; `issue_verdict(&ledger) -> Result<VerdictCert>` after the final close |
+| `Ledger` | `append(kind, msg, admission) -> Result<&LedgerEntry>`, `root_hex`, `len`, `entries`, `public_key_hex`, `certify(body) -> Result<Signed<CertBody>>` |
+| `Oracle` | `fetch(src) -> Result<Signed<Evidence>>` and `evidence_body(src)`, both only for sources in the supplied case context; unknown sources are an error, never fetched |
+| `JurorShell` | `commit(round, vote, confidence)`, `reveal(round)`, `reveal_with_vote(round, other)` for tests, `argue(round, text, evidence_ids, prev_hash)`, `envelope(body)`; a shell without a key produces C2 unsigned envelopes |
+| runner | `run_case(&CaseScript) -> Result<CaseRun { cert, report, tally }>`, presets `three_one` / `two_two` / `forged_evidence(condition)`, `Harness` exposing the live actors step by step (`open`, `attest`, `close_phase`, `commit_round`, `reveal_round`, `deliberate`, `finish`), `write_case(out_dir, &cert) -> PathBuf`, `tamper_first_argument_word(&cert)` used to derive the tampered fixture |
 
 Every submit call runs the admission engine and appends the result to the
-Ledger, whether accepted or not. Timing uses an injected simulated clock, so
-tests never sleep. Juror orchestration (`runJuror`) is owned by the jurors
-team; `JurorShell` is only the signing shell it calls.
+Ledger, whether accepted or not; a submit only fails when the envelope cannot
+be canonically hashed (for example a float). Timing uses an injected
+simulated clock, so tests never sleep; the runner closes each phase by
+advancing the clock past the deadline and ticking the Clerk. Juror
+orchestration (`runJuror`) is owned by the jurors team; `JurorShell` is only
+the signing shell it calls.
 
 ### JavaScript, `@sealed-verdict/protocol`
 
@@ -395,7 +398,7 @@ team; `JurorShell` is only the signing shell it calls.
 | `initNode()` | `./node` | Reads the `.wasm` from disk and calls `init` with the bytes. Node only. |
 | `verifyCert(cert)` | both | Synchronous after init. Returns `{ valid: boolean, failures: string[] }`. Never throws on malformed certificates; those return `SCHEMA_INVALID`. Throws only if called before init resolves. |
 | `isReady()` | both | Whether init has completed |
-| `protocolVersion()` | `.` | Returns `"sv1"` |
+| `protocolVersion()` | both | Returns `"sv1"` |
 
 The JS layer is glue only: it serializes the certificate to JSON, calls the
 single WASM export, and parses the report. There is no second verifier.
