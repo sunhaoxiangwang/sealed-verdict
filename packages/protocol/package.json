@@ -2,7 +2,7 @@
   "name": "@sealed-verdict/protocol",
   "version": "0.1.0",
   "private": true,
-  "description": "Sealed Verdict shared verifier as WebAssembly: await init(), then verifyCert(cert) -> { valid, failures }. Browser smoke page: run smoke:browser, then open http://127.0.0.1:8765/js/smoke.html",
+  "description": "Sealed Verdict shared verifier as WebAssembly: await init(), then verifyCert(cert) -> { valid, failures }",
   "type": "module",
   "exports": {
     ".": "./js/index.js",
@@ -16,7 +16,6 @@
   ],
   "scripts": {
     "build:wasm": "cargo build --release --target wasm32-unknown-unknown --manifest-path wasm/Cargo.toml && wasm-bindgen --target web --out-dir wasm/pkg --out-name sealed_verdict_protocol wasm/target/wasm32-unknown-unknown/release/sealed_verdict_protocol_wasm.wasm && rm -f wasm/pkg/.gitignore",
-    "test": "node --test js/verify.test.mjs",
-    "smoke:browser": "python3 -m http.server 8765 --bind 127.0.0.1"
+    "test": "node --test js/verify.test.mjs"
   }
 }

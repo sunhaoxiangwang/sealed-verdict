@@ -7,7 +7,6 @@
     "test:actors": "cargo test --manifest-path apps/actors/Cargo.toml",
     "test:wasm": "node --test packages/protocol/js/verify.test.mjs",
     "build:wasm": "pnpm --filter @sealed-verdict/protocol build:wasm",
-    "fixtures": "cargo run --manifest-path apps/actors/Cargo.toml --bin gen_fixtures -- --out packages/protocol/fixtures",
-    "smoke:browser": "pnpm --filter @sealed-verdict/protocol smoke:browser"
+    "fixtures": "cargo run --manifest-path apps/actors/Cargo.toml --bin gen_fixtures -- --out packages/protocol/fixtures"
   }
 }

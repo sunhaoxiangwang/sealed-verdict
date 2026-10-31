@@ -53,7 +53,6 @@ The frontend does not need a Rust toolchain: the generated WASM package under
 | Regenerate fixtures | `cargo run --manifest-path apps/actors/Cargo.toml --bin gen_fixtures -- --out packages/protocol/fixtures` |
 | Build WASM | `pnpm build:wasm` |
 | Native/WASM parity test | `pnpm test:wasm` |
-| Browser smoke page | `pnpm smoke:browser`, then open `http://127.0.0.1:8765/js/smoke.html` |
 
 The root `package.json` also exposes `test:protocol`, `test:actors`, and
 `fixtures` as shortcuts for the cargo commands above.

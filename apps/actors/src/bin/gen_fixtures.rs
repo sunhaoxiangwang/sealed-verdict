@@ -1,5 +1,5 @@
-//! Generate the public fixtures consumed by the protocol tests, the Node/WASM
-//! parity test, and the browser smoke page.
+//! Generate the public fixtures consumed by the protocol tests and the
+//! Node/WASM parity test.
 //!
 //! Keys are drawn fresh from the OS for every run and discarded; the files
 //! contain only public keys, signatures, certificates, and transcripts.

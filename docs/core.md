@@ -211,6 +211,13 @@ Changing any byte of any covered entry changes the root.
 after that boundary and is not itself a ledger entry, so it never references
 itself.
 
+Only that prefix is authenticated. The verifier recomputes the chain over
+`transcript[0..transcriptLen)` and compares it with `transcriptRoot`; entries
+after `transcriptLen` are not covered by any signature or hash and are not
+checked. A bundle may carry trailing entries for display, but a consumer must
+treat them as unverified and must not infer anything about the verdict from
+them.
+
 ## Phases and timeouts
 
 Phase closes happen in this frozen order, each as a Clerk-signed marker:
@@ -430,10 +437,11 @@ maps to these channels under a configurable prefix:
 <prefix>/<caseId>/cert
 ```
 
-The adapter boundary is a `Transport` trait on the Ledger (publish and
-subscribe to entries) and an `EvidenceSource` trait on the Oracle (resolve a
-source name to content). WP1 ships only in-memory implementations. Terse and
-Relay integration is a separately approved package, and nothing here assumes
+The proposed adapter boundary is a `Transport` trait on the Ledger (publish
+and subscribe to entries) and an `EvidenceSource` trait on the Oracle (resolve
+a source name to content). Neither trait exists in the WP1 code; the Ledger
+and Oracle are concrete in-memory types, and the traits would be introduced
+by the sponsor-adapter package once its plan is approved. Nothing here assumes
 either sponsor provides a native Rust SDK; the adapters may sit behind a thin
 HTTP or Node boundary.
 
@@ -453,6 +461,9 @@ HTTP or Node boundary.
 - **Ledger orders arrivals.** Arrival order is canonical and the chain
   commits to it. The Ledger is trusted for ordering and liveness, not for
   content, which signatures cover.
+- **Only the covered prefix is authenticated.** Verification covers
+  `transcript[0..transcriptLen)`. Trailing entries, if present, are not hashed
+  into `transcriptRoot`, are not replayed, and carry no assurance.
 - **C2 does not authenticate jurors.** C2 certificates prove ledger order and
   phase sequence only.
 - `Argument.prevHash` is informational and unchecked.

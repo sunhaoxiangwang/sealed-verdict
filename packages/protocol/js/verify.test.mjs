@@ -61,6 +61,33 @@ test("malformed input yields SCHEMA_INVALID without throwing", async () => {
   }
 });
 
+test("undefined input yields SCHEMA_INVALID without throwing", async () => {
+  await initNode();
+  const report = verifyCert(undefined);
+  assertReportShape(report);
+  assert.equal(report.valid, false);
+  assert.equal(report.failures.length, 1);
+  assert.ok(report.failures[0].startsWith("SCHEMA_INVALID"), report.failures[0]);
+});
+
+test("BigInt-containing input yields SCHEMA_INVALID without throwing", async () => {
+  await initNode();
+  const report = verifyCert({ cert: { body: { n: 1n } }, transcript: [] });
+  assertReportShape(report);
+  assert.equal(report.valid, false);
+  assert.ok(report.failures.some((f) => f.startsWith("SCHEMA_INVALID")), report.failures.join("; "));
+});
+
+test("circular input yields SCHEMA_INVALID without throwing", async () => {
+  await initNode();
+  const o = { cert: {} };
+  o.self = o;
+  const report = verifyCert(o);
+  assertReportShape(report);
+  assert.equal(report.valid, false);
+  assert.ok(report.failures.some((f) => f.startsWith("SCHEMA_INVALID")), report.failures.join("; "));
+});
+
 test("WASM reports match native reports for every fixture", async (t) => {
   if (!(await exists(new URL("expected.json", FIXTURES)))) {
     t.skip("fixtures not generated yet; run pnpm fixtures");

@@ -53,10 +53,12 @@ export function isReady() {
 
 /**
  * Verify a `{ cert, transcript }` bundle exactly as written by run_case or shipped in fixtures.
- * Synchronous after init(). Never throws on malformed certificate content; malformed input
- * yields `{ valid: false, failures: ["SCHEMA_INVALID: ..."] }`.
+ * Synchronous after init(). Never throws after init: malformed certificate content, input that
+ * cannot be serialized to JSON (BigInt, circular references), and input that serializes to
+ * nothing (undefined, functions, symbols) all yield
+ * `{ valid: false, failures: ["SCHEMA_INVALID: ..."] }`. Throws only when called before init().
  *
- * @param {object} cert
+ * @param {unknown} cert
  * @returns {{ valid: boolean, failures: string[] }}
  */
 export function verifyCert(cert) {
@@ -65,7 +67,23 @@ export function verifyCert(cert) {
       "@sealed-verdict/protocol: call `await init()` (or initNode()) before verifyCert()",
     );
   }
-  const { valid, failures } = JSON.parse(verifyCertJson(JSON.stringify(cert)));
+  let json;
+  try {
+    json = JSON.stringify(cert);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return {
+      valid: false,
+      failures: [`SCHEMA_INVALID: input is not JSON-serializable: ${message}`],
+    };
+  }
+  if (json === undefined) {
+    return {
+      valid: false,
+      failures: ["SCHEMA_INVALID: input serializes to nothing (undefined, function or symbol)"],
+    };
+  }
+  const { valid, failures } = JSON.parse(verifyCertJson(json));
   return { valid, failures };
 }
 
