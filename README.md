@@ -56,41 +56,53 @@ the results page until they land.
 
 | Path | Contents | Owner |
 | --- | --- | --- |
-| `packages/protocol/` | Wire types, canonical encoding, signing, commitments, transcript chain, admission engine, certificate verifier, WASM build and JS glue, fixtures | Leo |
-| `apps/actors/` | In-memory Clerk, Ledger, Oracle, juror signing shell, scripted case runner, fixture generator | Leo |
-| `apps/web/` | All visuals | Frontend team |
-| `apps/jurors/` | Juror orchestration, `runJuror(caseId, { persona, model, condition, byzantine? })` | Teammate |
-| `eval/` | Answer mapping and evaluation | Data scientist |
-| `docs/core.md` | Protocol specification and known limits | Leo |
+| `packages/protocol/` | Rust wire types, canonical encoding, Ed25519 signing, commitments, transcript chain, admission engine, certificate verifier, WASM build and JS glue, public fixtures | Leo |
+| `apps/actors/` | Rust Clerk, Ledger, Oracle, juror signing shell, scripted runner, live `clerk_daemon`; `bridge/` Node glue for Agent Relay transport, sealed intents, and the Terse case actor | Leo |
+| `apps/jurors/` | LLM jurors on Agent Relay for conditions C2 to C5: TypeScript runner, CLI, Python entry point, quickstart and permission probe | Rikin |
+| `eval/` | Preregistered benchmark: data preparation, C0/C1 baselines, jury runs, scorer, plots, spec | Chengyao (data science) |
+| `apps/web/` | Courtroom, certificate verify/tamper page, C2-vs-C5 replay, results ladder | Dan (frontend) |
+| `docs/` | `core.md` protocol specification and known limits, `handoff.md` backend handoff | Leo |
 
-Only the owner edits a directory. Shared root files (`package.json`,
-`pnpm-workspace.yaml`, `.env.example`, `.gitignore`) are coordinated by Leo.
+The backend (`packages/protocol`, `apps/actors`) is the reference for the wire
+contract and verification; the other tracks were merged on top of it in the
+order jurors, evaluation, frontend. Two live Relay paths exist today: the
+backend bridge, which drives the Rust Clerk and produces verifiable
+certificates, and the jurors runner in `apps/jurors`, which implements its own
+C2 to C5 flow in TypeScript for the evaluation runs. They share the Agent Relay
+workspace and the condition definitions but not code; unifying them is open
+work.
 
 ## Prerequisites
 
-- Rust 1.85 or newer with the `wasm32-unknown-unknown` target
-  (`rustup target add wasm32-unknown-unknown`).
-- `wasm-bindgen-cli` 0.2.128, matching the pinned crate version
-  (`cargo install wasm-bindgen-cli --version 0.2.128 --locked`).
-- Node 20 or newer and pnpm (`npm i -g pnpm`), then `pnpm install` at the
-  repository root to link the workspace.
-
-The frontend does not need a Rust toolchain: the generated WASM package under
-`packages/protocol/wasm/pkg` is committed.
+- Backend: Rust 1.85 or newer with the `wasm32-unknown-unknown` target,
+  `wasm-bindgen-cli` 0.2.128, Node 22 or newer, pnpm (`pnpm install` at the
+  root links the workspace). Live mode adds Bun 1.4.2 or newer with
+  `terse-cli` 0.14.9 (`bunx terse-cli@0.14.9 install`).
+- Jurors: Node 22 or newer; `cd apps/jurors && npm install`. Without
+  `OPENAI_API_KEY` the jurors are scripted mocks and their verdicts carry
+  `mock: true`; numbers from mock runs are never reported.
+- Evaluation: Python 3 with `pip3 install -r eval/requirements.txt`. Read and
+  commit `eval/PREREGISTRATION.md` before any real run.
+- Frontend: `cd apps/web && npm install --legacy-peer-deps`. The frontend does
+  not need a Rust toolchain; the generated WASM package under
+  `packages/protocol/wasm/pkg` is committed.
 
 ## Commands
 
 | Task | Command |
 | --- | --- |
 | Protocol tests | `cargo test --manifest-path packages/protocol/Cargo.toml` |
-| Actor tests | `cargo test --manifest-path apps/actors/Cargo.toml` |
-| Run one case | `cargo run --manifest-path apps/actors/Cargo.toml --bin run_case -- --script 3-1 --condition C3 --out apps/actors/out` |
+| Actor and daemon tests | `cargo test --manifest-path apps/actors/Cargo.toml` |
+| Run one in-memory case | `cargo run --manifest-path apps/actors/Cargo.toml --bin run_case -- --script 3-1 --condition C3 --out apps/actors/out` |
 | Regenerate fixtures | `cargo run --manifest-path apps/actors/Cargo.toml --bin gen_fixtures -- --out packages/protocol/fixtures` |
 | Build WASM | `pnpm build:wasm` |
 | Native/WASM parity test | `pnpm test:wasm` |
-
-The root `package.json` also exposes `test:protocol`, `test:actors`, and
-`fixtures` as shortcuts for the cargo commands above.
+| Live case over Relay and Terse | see Live mode below |
+| Jurors quickstart (four agents on one channel plus permission probe) | `cd apps/jurors && npm run quickstart` |
+| Jurors condition run | `cd apps/jurors && npx tsx src/cli.ts --condition C2 --in ../../eval/data/items.jsonl --out ../../eval/results/verdicts/C2.jsonl --limit 20` |
+| Eval smoke, no keys | `cd eval && python3 baselines.py --provider mock --smoke && for c in C2 C3 C4 C5; do python3 run_relay.py --config configs/$c.yaml --provider mock --smoke; done` |
+| Eval scoring and plots | `cd eval && python3 metrics.py && python3 plots.py` |
+| Frontend | `cd apps/web && npm run dev` (http://localhost:5173), demo script in `apps/web/README.md` |
 
 `run_case` accepts `--script 3-1`, `2-2`, or `forged`, `--condition C2`
 through `C5`, an optional `--case-id`, and writes
@@ -149,14 +161,18 @@ see docs/core.md for the exact limits.
 
 ## Environment variables
 
-The in-memory runner needs no environment variables. Live mode reads
-`RELAY_WORKSPACE_KEY` and `RELAY_BASE_URL` (default `http://127.0.0.1:8787`)
-for Agent Relay, and `TERSE_ACTOR_URL` (default
-`http://127.0.0.1:7100/v1/projects/local/actors`) and `TERSE_API_KEY` (hosted
-only) for Terse. Names reserved for teammate packages are also listed in
-`.env.example`: `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `SUPABASE_URL`,
-`SUPABASE_ANON_KEY`. Copy the file to `.env` for local values; `.env` is
-gitignored and must never be committed.
+Names only; values live in gitignored `.env` files (`.env.example` at the
+root, `apps/jurors/.env.local`, `apps/web/.env.example`).
+
+| Track | Names |
+| --- | --- |
+| Backend live mode | `RELAY_WORKSPACE_KEY`, `RELAY_BASE_URL` (default `http://127.0.0.1:8787`), `TERSE_ACTOR_URL` (default `http://127.0.0.1:7100/v1/projects/local/actors`), `TERSE_API_KEY` (hosted only) |
+| Jurors | `OPENAI_API_KEY`, `EVAL_MODEL`, `RELAY_WORKSPACE_KEY` |
+| Evaluation | `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GEMINI_API_KEY`, optional `ANTHROPIC_MODEL`, `OPENAI_MODEL`, `GEMINI_MODEL` |
+| Frontend live toggle | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` |
+
+The in-memory backend runner needs none of them. The Relay workspace key acts
+like a password: share it privately and never commit it.
 
 ## Fixtures and output walkthrough
 
