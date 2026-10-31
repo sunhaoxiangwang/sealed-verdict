@@ -17,7 +17,7 @@ const Q = new URLSearchParams(typeof location !== "undefined" ? location.search 
 const DEBUG_TOP = Q.get("top") === "1";
 const HIDE = new Set((Q.get("hide") ?? "").split(",").filter(Boolean));
 const TARGET = DEBUG_TOP ? new Vector3(0, 0, -1.5) : new Vector3(0, 1.1, -1.2);
-const BASE = (DEBUG_TOP ? new Vector3(0.01, 11, -1.5) : new Vector3(0, 2.3, 4.0)).sub(TARGET);
+const BASE = (DEBUG_TOP ? new Vector3(0.01, 11, -1.5) : new Vector3(0, 2.45, 4.7)).sub(TARGET);
 const MAX = 0.15;
 const v = new Vector3();
 
@@ -41,7 +41,7 @@ export default function CourtroomScene() {
       <Canvas
         shadows="soft"
         dpr={[1, 1.5]}
-        camera={{ position: [0, 2.3, 4.0], fov: 42, near: 0.1, far: 60 }}
+        camera={{ position: [0, 2.45, 4.7], fov: 42, near: 0.1, far: 60 }}
         gl={{ antialias: false, powerPreference: "high-performance" }}
       >
         <color attach="background" args={["#0b0a0d"]} />

@@ -38,7 +38,7 @@ export const JUROR_LAYOUT = [
   { x: 2.05, z: -0.4 },
 ];
 /** Y rotation so local -Z (the model front) points at the bench. */
-export const CAMERA_POS: [number, number, number] = [0, 2.3, 4.0];
+export const CAMERA_POS: [number, number, number] = [0, 2.45, 4.7];
 /** Jurors face the camera (audience); the bench is the backdrop behind them. */
 /** Blender's front (-Y) exports as glTF +Z, so local +Z is the model's face. */
 export const facingBench = (x: number, z: number) => Math.atan2(CAMERA_POS[0] - x, CAMERA_POS[2] - z);

@@ -1,6 +1,6 @@
 import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
-import { Html, useGLTF } from "@react-three/drei";
+import { Text, useGLTF } from "@react-three/drei";
 import { clone } from "three/examples/jsm/utils/SkeletonUtils.js";
 import type { Group, Mesh, MeshStandardMaterial } from "three";
 import { useTribunal } from "../store/tribunal";
@@ -159,14 +159,24 @@ export default function Juror({ index }: { index: number }) {
           </Safe>
           <Candle position={[0, 1.0, 0.02]} seed={index} />
         </group>
+        {/* plaque on the lectern front (in-canvas text; no DOM roots) */}
+        <group position={[0, 0.56, 0.7 + 0.115]}>
+          <mesh position={[0, 0, -0.004]}>
+            <planeGeometry args={[0.66, 0.17]} />
+            <meshStandardMaterial color="#0b0a0d" roughness={0.6} transparent opacity={0.82} />
+          </mesh>
+          <mesh position={[-0.27, 0.02, 0.001]}>
+            <circleGeometry args={[0.014, 16]} />
+            <meshBasicMaterial color="#5ac47c" toneMapped={false} />
+          </mesh>
+          <Text font="/fonts/JetBrainsMono-Medium.ttf" fontSize={0.054} color="#e8dcc0" anchorX="left" anchorY="middle" position={[-0.24, 0.022, 0.001]}>
+            {data?.pseudonym ?? "empty seat"}
+          </Text>
+          <Text font="/fonts/JetBrainsMono-Medium.ttf" fontSize={0.038} color="#a69a86" anchorX="left" anchorY="middle" position={[-0.24, -0.038, 0.001]}>
+            {data?.persona ?? ""}
+          </Text>
+        </group>
       </group>
-      <Html position={[L.x, 0.28, L.z + 1.05]} center zIndexRange={[10, 0]} distanceFactor={4.5} style={{ pointerEvents: "none" }}>
-        <div className="nameplate">
-          <span className="nameplate-dot" title="signed" />
-          <span className="nameplate-name">{data?.pseudonym ?? "empty seat"}</span>
-          <span className="nameplate-persona">{data?.persona ?? ""}</span>
-        </div>
-      </Html>
     </>
   );
 }
