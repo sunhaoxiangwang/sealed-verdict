@@ -1,0 +1,18 @@
+{
+  "name": "sealed-verdict-terse",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Terse durable CaseActor: per-case registry, phase, transcript entries, chain head, and final certificate for Sealed Verdict",
+  "scripts": {
+    "dev": "terse actor dev --port 7100",
+    "generate": "terse actor generate --out-dir ../generated --non-interactive",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "terse-sdk": "0.14.9"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
