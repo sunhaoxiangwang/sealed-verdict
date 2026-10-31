@@ -529,15 +529,20 @@ frozen LedgerEntry fields.
 
 Signing intents are private: a juror sends `{ kind: "commit" | "reveal" |
 "argument", round, vote?, confidence?, text?, evidenceIds? }` as a Relay DM
-to the clerk agent. The bridge acts only when both authenticated identities
-match: the recipient id (`envelope.to`, verified against the installed SDK
-types and a live DM) must be this case's clerk agent and the sender id
-(`message.from.id`) must be a registered juror; a DM without an
-authenticated recipient is dropped before it reaches the bridge, and a
-juror-to-juror DM or an unknown sender is ignored and counted, never signed.
-The bridge then asks the daemon to sign, publishes the signed envelope on
-the public channel, and DMs back `{ ok, kind, round, messageId }` or
-`{ ok: false, error }`. The first commitment per juror and round wins: a
+to the clerk agent. SDK 15.0.1 omits the DM recipient id from
+`dm.received` events (verified against the installed types and a live DM),
+so recipient identity comes from stream ownership instead: the bridge keeps
+the clerk as the only agent on its Relay hub, and that hub receives exactly
+the DMs the engine delivered to the clerk's own token. Jurors, the tap, and
+any extra agent such as the test intruder are registered on a separate
+observer hub. A juror-to-juror DM therefore never reaches the bridge intent
+handler and is not counted there; the relay wrapper also drops any DM for
+which no authenticated recipient can be established before the handler
+runs. Sender validation still applies on the clerk hub: `message.from.id`
+must be a registered juror bound to a signing shell, or the DM is ignored
+and counted, never signed. The bridge then asks the daemon to sign,
+publishes the signed envelope on the public channel, and DMs back
+`{ ok, kind, round, messageId }` or `{ ok: false, error }`. The first commitment per juror and round wins: a
 second commit intent in the same round is answered `duplicate_commit` and
 leaves the first vote and nonce untouched, so the later reveal still
 matches. Plaintext votes and nonces never appear on a public
