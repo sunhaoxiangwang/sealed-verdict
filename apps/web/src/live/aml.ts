@@ -4,10 +4,11 @@ import { verifyWire } from "../protocol/crypto";
 import { verifyBundle, type ProtocolBundle, type LedgerEntry, type Registry } from "../protocol/native";
 import type { Phase, TribunalEvent } from "../protocol/types";
 
+export type AMLCase = { id: string; title: string; question: string; description: string; source: string; choices: string[]; context: {source: string; content: string}[] };
 type Snapshot = {
-  input: { title: string; question: string; description: string; source: string };
+  input: AMLCase;
   panel: { id: string; provider: string; role: string }[];
-  run: null | { caseId: string; status: string; stage: string; error?: string; events: { text?: string; result?: { reason: string; missingInformation: string[] }; stage: string }[] };
+  run: null | { caseId: string; status: string; stage: string; error?: string; assessments?: {juror: string; answer: string; reason: string}[]; events: { text?: string; result?: { reason: string; missingInformation: string[] }; stage: string }[] };
   registry: Registry | null;
   actor: null | { phase: { phase: Phase; round: number; closed: boolean } };
   transcript: LedgerEntry[];
@@ -15,7 +16,7 @@ type Snapshot = {
   missingKeys: string[];
   terseMode: string;
 };
-export const useAML = create<{ snapshot?: Snapshot; error?: string }>(() => ({}));
+export const useAML = create<{ snapshot?: Snapshot; error?: string; pendingCase?: AMLCase }>(() => ({}));
 const personas = ["domain expert", "skeptic", "statistician", "devil's advocate"];
 
 export function subscribeAML() {
@@ -83,7 +84,8 @@ export function subscribeAML() {
 }
 
 export async function startAML() {
-  const response = await fetch("/api/aml/run", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
+  const response = await fetch("/api/aml/run", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ case: useAML.getState().pendingCase }) });
   const data = await response.json();
   if (!response.ok) throw new Error(data.error);
+  useAML.setState({ pendingCase: undefined });
 }

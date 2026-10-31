@@ -4,6 +4,7 @@ import { useTribunal } from "../store/tribunal";
 import { useAML } from "../live/aml";
 import { verifyBundle, type VerifyReport } from "../protocol/native";
 import "../styles/certificate.css";
+import AMLConclusion from "../components/AMLConclusion";
 
 export default function LiveCertificate() {
   const bundle = useTribunal(s => s.protocolBundle);
@@ -16,7 +17,8 @@ export default function LiveCertificate() {
   return <div className="cert-page">
     <p className="kicker">Live AML · C5 · Rust protocol</p>
     <article className={`cert ${report && !report.valid ? "cert-broken" : ""}`}>
-      <h1>Verdict Certificate</h1>
+      <h1>Verified Case Conclusion</h1>
+      <AMLConclusion />
       <dl className="cert-grid">
         <dt>Case</dt><dd>{body.caseId}</dd>
         <dt>Recommendation</dt><dd>{body.verdict}</dd>

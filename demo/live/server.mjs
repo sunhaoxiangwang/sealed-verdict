@@ -8,17 +8,20 @@ import { createWorkspace } from "../../apps/actors/bridge/src/relay.js";
 import { createTerse } from "../../apps/actors/bridge/src/terse.js";
 import { runWorkflow, panel } from "./workflow.mjs";
 import { archiveCase, readArchive, hasArchive } from "./supabase.mjs";
+import { validateCase } from "./case-input.mjs";
 
 export const root = fileURLToPath(new URL("../../", import.meta.url));
 if (existsSync(path.join(root, ".env"))) process.loadEnvFile(path.join(root, ".env"));
 if (existsSync(path.join(root, ".env.live"))) process.loadEnvFile(path.join(root, ".env.live"));
-const input = JSON.parse(readFileSync(path.join(root, "demo/data/td-bank-public-case.json"), "utf8"));
+const example = JSON.parse(readFileSync(path.join(root, "demo/data/td-bank-public-case.json"), "utf8"));
+let input = example;
 const runs = path.join(root, "demo/live/runs");
 mkdirSync(runs, { recursive: true, mode: 0o700 });
 const latest = path.join(runs, "latest.json");
 let state = existsSync(latest) ? JSON.parse(readFileSync(latest, "utf8")) : null;
 let archived = !state ? await readArchive() : null;
 if (archived?.run) state = archived.run;
+input = state?.input || archived?.input || example;
 if (state?.status === "running") {
   state.status = "failed";
   state.error = "The process stopped during this run. Start a new case; signing keys are never restored.";
@@ -37,7 +40,7 @@ const json = (res, status, body) => {
 
 async function start() {
   controller = new AbortController();
-  state = { caseId: `aml-${Date.now().toString(36)}-${randomBytes(3).toString("hex")}`, status: "running", stage: "alert", events: [], startedAt: new Date().toISOString() };
+  state = { caseId: `aml-${Date.now().toString(36)}-${randomBytes(3).toString("hex")}`, input, status: "running", stage: "alert", events: [], startedAt: new Date().toISOString() };
   save();
   const update = event => {
     state.stage = event.stage;
@@ -56,6 +59,7 @@ async function start() {
     state.status = "complete";
     state.report = result.report;
     state.stats = result.stats;
+    state.assessments = result.assessments;
     state.finishedAt = new Date().toISOString();
     save();
     await archiveCase(await snapshot());
@@ -86,6 +90,10 @@ const dist = path.join(root, "apps/web/dist");
 const server = createServer(async (req, res) => {
   try {
     const url = new URL(req.url, "http://localhost");
+    if (url.pathname === "/api/aml/example" && req.method === "GET") {
+      res.setHeader("Content-Disposition", 'attachment; filename="td-bank-aml-case.json"');
+      return json(res, 200, example);
+    }
     if (url.pathname === "/api/aml" && req.method === "GET") {
       return json(res, 200, archived && state?.status === "complete" ? { ...archived, missingKeys: missingKeys() } : await snapshot());
     }
@@ -94,8 +102,19 @@ const server = createServer(async (req, res) => {
       if (req.headers.origin && new URL(req.headers.origin).host !== req.headers.host) return json(res, 403, { error: "Cross-origin run refused" });
       if (req.headers["content-type"] !== "application/json") return json(res, 415, { error: "Use application/json" });
       if (missingKeys().length) return json(res, 503, { error: `Missing ${missingKeys().join(", ")}` });
+      let requested;
+      try {
+        let body = "";
+        for await (const chunk of req) {
+          body += chunk;
+          if (Buffer.byteLength(body) > 65536) return json(res, 413, { error: "Case file must be smaller than 64 KB" });
+        }
+        const payload = JSON.parse(body || "{}");
+        requested = validateCase(payload.case ?? example);
+      } catch (error) { return json(res, 400, { error: error.message }); }
       // ponytail: one active case per demo server; add a job queue for multiple operators.
       if (state?.status === "running") return json(res, 409, { error: "A case is already running" });
+      input = requested;
       archived = null;
       void start();
       return json(res, 202, { caseId: state.caseId });

@@ -30,6 +30,7 @@ export function callAgent(request, signal) {
 }
 
 export async function runWorkflow({ input, caseId, relay, terse, outDir, update, signal }) {
+  const assessments = [];
   const evidence = input.context.map((e, i) => ({ id: `ev-${i}`, ...e }));
   const ask = (provider, role, task, suffix, extra = {}) => callAgent({
     provider, role, task, question: input.question, evidence,
@@ -72,6 +73,7 @@ export async function runWorkflow({ input, caseId, relay, terse, outDir, update,
               task: next.phase === "deliberate" ? "Present your own evidence-based argument for peer review." : "Cast your independent ballot. Only use admitted evidence; peer claims are not new evidence.",
               requestId: `${caseId}/${juror.id}/${next.phase}/${next.round}`, ...(args ? { arguments: args } : {}),
             }, signal);
+            if (next.phase === "commit" && next.round === 1) assessments.push({ juror: juror.id, ...response });
             // Never expose a blind ballot in HTTP status or logs before its reveal.
             update({ stage: "panel", text: `${juror.id}: ${response.provider}/${response.model} responded`, provider: response.provider, model: response.model });
             intent = next.phase === "commit"
@@ -88,5 +90,5 @@ export async function runWorkflow({ input, caseId, relay, terse, outDir, update,
   });
   if (result.cert.cert.body.quorum.counted !== 4) throw new Error("Incomplete live panel: not all four final reveals were admitted");
   update({ stage: "human_review", text: `Panel recommendation: ${result.cert.cert.body.verdict}. Human compliance review is pending; no SAR has been filed.` });
-  return result;
+  return { ...result, assessments };
 }
