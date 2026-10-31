@@ -7,15 +7,16 @@ export default function PhaseRibbon() {
   const phase = useTribunal((s) => s.phase);
   const at = PHASES.indexOf(phase);
   return (
-    <ol className="phase-ribbon" aria-label="Phases">
+    <ol className="phases" aria-label="Phases">
       {PHASES.map((p, i) => {
-        const done = at > i;
-        const active = i === at;
+        const state = at > i ? "done" : i === at ? "active" : "todo";
         return (
-          <li key={p} className={`phase ${active ? "active" : ""} ${done ? "done" : ""}`} aria-current={active ? "step" : undefined}>
+          <li key={p} className="phase" data-state={state} aria-current={state === "active" ? "step" : undefined}>
+            <span className="phase-seg" aria-hidden="true">
+              <span className="phase-fill" />
+            </span>
             <span className="phase-label">{p}</span>
-            {done && <span className="stamp stamp-green stamp-done" aria-hidden="true">Done</span>}
-            {active && <span className="stamp stamp-red" aria-hidden="true">Open</span>}
+            {state === "done" && <span className="sr-only">done</span>}
           </li>
         );
       })}

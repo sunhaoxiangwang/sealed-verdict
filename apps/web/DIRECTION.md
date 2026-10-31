@@ -1,39 +1,34 @@
-# Sealed Verdict — visual direction: "The Coroner's Inquest, after dark"
+# Sealed Verdict — visual direction v2: "Night court, modern"
 
-The 2D interface is the paperwork of a Victorian coroner's inquest held by candlelight. Every fact is an **evidence tag**: manila card, brass eyelet, typewritten label, ink stamp. Every judgment is **a stamped docket**. The verdict is **a sealed writ**. The 3D courtroom (already built, do not restyle) supplies the candlelight; the UI supplies the paperwork. Halloween lives in the morbidity of an inquest, blackletter headers, wax, and candle glow, never in pumpkins, cobwebs or bats.
+Replace the paper-and-stamps look entirely. The new UI is a premium, modern dark product interface (think a 2026 AI product: Linear, Vercel, Arc levels of polish) with one Halloween signature: ember light in a black void. The 3D courtroom is the hero; the UI is a quiet, glassy HUD around it. No paper, no stamps, no typewriter, no blackletter, no cobwebs, no pumpkins.
 
-## Ground and light
-- Ground is rocked velvet black `#0b0a0d`; panels are plate-tone brown-black `#15110f` where light falls, never flat grey.
-- Light is warm and local: candle orange `#ff8c3a` appears only as glow (text-shadow, box-shadow, active-phase lamp), never as a fill or button colour.
-- Paper: manila tag `#d9c48f`, parchment `#e8dcc0`, aged edge `#b89f62`. Paper surfaces get a faint grain (inline SVG feTurbulence at 4–6% opacity) and a 1px darker bottom-right edge shadow, not drop shadows.
-- Ink: india-ink black `#15110f` on paper; stamps are wax red `#9b1b1b` (FORGED, VOID, TAINTED, SPECIMEN) and spectral green `#3f9a5f` on paper / `#5ac47c` on dark (VERIFIED, ATTESTED, HELD); uncertain is amber `#d7a73b`.
-- Hardware: brass `#c9a24a` with dark brass `#8a6a2a` for eyelets, pins, rails, toggle, button rims. Metallic look = two-stop linear gradient + 1px highlight, never a glossy blob.
+## Ground, surfaces, light
+- Page ground: `#07060a` with one large, very soft radial glow of ember `rgba(255,140,58,.10)` top-center and a violet glow `rgba(120,80,255,.08)` bottom-right. Fixed, not scrolling.
+- Surfaces are glass: `background: rgba(255,255,255,.035)`, `border: 1px solid rgba(255,255,255,.08)`, `backdrop-filter: blur(16px)`, radius 14px (cards) / 10px (inputs, chips) / 999px (pills). Elevated surfaces add a 1px top highlight `rgba(255,255,255,.12)` via inset box-shadow. No drop shadows except a single soft ambient shadow on floating panels `0 20px 60px rgba(0,0,0,.45)`.
+- Text: `#f3efe8` primary, `#a9a3b3` secondary, `#6f6a7a` tertiary. Never pure white.
+- Accents (only for meaning): ember `#ff8c3a` = live/active/attention; verified green `#4ade80`; forged red `#f87171`; uncertain amber `#fbbf24`; brass `#d6b36a` only for the wordmark seal and the certificate ribbon. Accent colours appear as 1px borders, dots, text, and soft outer glows (`0 0 24px color at 35%`), never as large fills. Buttons are neutral glass; the primary action is a white-on-dark pill.
+- Signature: ember light. The active phase, a speaking juror, the live toggle, and the verdict moment glow ember with a slow 3s breathing animation (reduced-motion: static).
 
-## Type (self-hosted, see src/styles/fonts.css)
-- Wordmark and section kickers: **Pirata One** (blackletter), used small and sparingly: wordmark, page kickers ("INQUEST No. 0412"), stamp text never.
-- Headings and body: **Libre Caslon Text** 400 / 400 italic / 700. Headings tracked slightly tight, body 16–17px, line-height 1.5.
-- Typewritten labels on tags and forms: **Special Elite** 12–13px, uppercase, letter-spacing 0.08em, ink slightly uneven (opacity .92).
-- Hashes, ids, numbers: **JetBrains Mono** (already in public/fonts).
-- Scale: 11 / 13 / 15 / 17 / 22 / 30 / 44. More space above a heading than below it.
+## Type (self-hosted; another agent writes src/styles/fonts.css with these families)
+- UI: **Inter** 400 / 500 / 600 with `font-feature-settings: "cv11", "ss01", "tnum"`; body 15px / 1.5; labels 12px uppercase tracking .08em in 500.
+- Display: **Instrument Serif** 400 (and italic) for the wordmark and page titles only, 32–44px, letter-spacing -0.01em. Pairing serif display + Inter body is the whole typographic idea; no third face.
+- Data (hashes, ids, numbers): **JetBrains Mono** 400, 12–13px, `#a9a3b3`, tnum.
 
-## Components
-- **Top bar: the docket header.** Wordmark "Sealed Verdict" in Pirata One with a 14px inked wax-seal glyph (inline SVG) before it; under it, on the courtroom page only, the typewritten line "Debate gives you agreement. Signatures give you accountability." Nav links are folder tabs: manila tab shape (clip-path), typewriter caps, the active tab lifted and lighter; phase pill at right becomes a small docket stamp box.
-- **Phase ribbon: the inquest docket.** A carbon-copy form strip with five ruled boxes, labels typewritten (ATTEST, COMMIT, REVEAL, DELIBERATE, VERDICT). Completed boxes carry a green ink stamp "DONE" rotated -6°; the active box receives a red stamp with the press animation and a candle-orange underline glow; upcoming boxes are empty ruled boxes.
-- **Transcript feed: evidence tags.** Each item is a manila tag (rounded-rect with a cut corner at top-left and a brass eyelet with a short string drawn in CSS), typewritten header line: `EXHIBIT e3 · ORACLE` or `JUROR shade-b24 · ROUND 2`, then the body in Libre Caslon. Signature badge is a circular ink stamp overlapping the tag's right edge: VERIFIED (green ring, rotated -8°), FORGED and UNATTESTED (red, "VOID" style with a strike line). System and phase items are narrower slips of white carbon paper with a typewritten line, no eyelet. New items swing in (rotate -3° → 0, 280ms ease-out).
-- **Buttons: brass plates.** Dark ground, 1px brass rim, label in Special Elite caps with a letterpress text-shadow (0 1px 0 rgba(0,0,0,.6)); hover: inner glow candle-orange at 25%; active: translateY(1px). The three attack buttons are **writs**: parchment chips with a small red wax seal at the left and a red rim; their labels "Forge evidence", "Turn juror Byzantine", "Tamper transcript". MOCK/LIVE is a brass toggle switch with a tiny lantern that lights when LIVE.
-- **Cards (results, replay, certificate):** report forms: paper panel with a ruled top band (typewritten title on the band), thin brass corner pins, no rounded 10px radius; radius 3px max. Charts keep their data colours; chart text in JetBrains Mono.
-- **Stamps:** `.stamp` utility: uppercase Special Elite, 2px double border, rotated -6° to -10°, mix-blend-mode multiply on paper, slight ink bleed via text-shadow 0 0 1px currentColor; the press animation is scale(1.25)→1 with 180ms cubic-bezier(.2,.9,.3,1.2), once, on mount.
+## Layout and components
+- **Top bar**: 56px, transparent over the glow, bottom border `rgba(255,255,255,.06)`. Left: a 20px seal mark (inline SVG: brass ring, dark centre, tiny "SV" in Instrument Serif) + "Sealed Verdict" in Instrument Serif 20px. Centre: nav as a segmented pill (glass track, the active item a lighter glass pill with 1px border, 13px Inter 500). Right: a status chip: ember dot + "DELIBERATE" in 12px caps when a case runs, grey dot + "IDLE" otherwise.
+- **Phase progress** (courtroom): a slim 6px track with five segments and small labels beneath (12px caps). Completed segments green at 60%, active ember with glow and a sliding shimmer, upcoming `rgba(255,255,255,.08)`. No boxes.
+- **3D panel**: full-bleed within its glass frame, radius 16px, 1px border, and an inner vignette overlay (CSS gradient) so the edges melt into the page. A small floating HUD chip at top-left of the panel: case id in mono + claim in 13px, max 2 lines, glass pill.
+- **Transcript** ("Ledger"): a vertical stream. Each item: a 28px avatar disc (initials of the pseudonym in mono, disc tinted by juror: give each pseudonym a hue from a fixed list of 4 muted hues), a header line (pseudonym 13px 500, then "· REVEAL" 12px caps tertiary, then a status pill at right: `verified` green outline pill, `forged` / `unattested` red outline pill, 11px caps), then the body 14px secondary→primary on hover. Evidence items use a document icon instead of an avatar and show the source in mono. System and phase items are single centred lines, 12px tertiary, with a thin divider. New items fade+rise in (6px, 220ms ease-out). The list is `scroll-behaviour: smooth` and auto-scrolls to bottom.
+- **Controls bar**: left group: Play/Pause primary white pill (icon + label), Replay ghost, speed as a 3-option segmented pill. Middle: the three attack actions as ghost buttons with a small icon and red text on hover, labelled "Forge evidence", "Byzantine juror", "Tamper transcript". Right: MOCK/LIVE as a proper switch (track 36×20, knob, ember when LIVE) with a 12px label.
+- **Results**: page title "Bias ablation ladder" in Instrument Serif, a one-sentence lede, then three stat tiles in one glass row (label 12px caps, value 32px Instrument Serif, delta/note 13px). Charts live in glass cards with a 12px caps title and a right-aligned legend; keep the data colours; axes `rgba(255,255,255,.06)`. The ILLUSTRATIVE state is a small amber outline pill "Illustrative data" next to the title, MEASURED a green pill "Measured · n=…". Table rows 13px with mono numbers.
+- **Replay**: two glass columns with a sticky header per column (condition name 16px 500, description 13px secondary), juror chips as avatar disc + name + vote pill; "flipped" shows as a small red pill "flipped". Verdict banner at the bottom of each column: a glass bar with a coloured left border (red for herded, green for held) and the text.
+- **Certificate**: a document card on glass with a subtle brass left border (3px gradient), title "Verdict certificate" in Instrument Serif, meta as a 2-column definition grid (labels 12px caps, values 14px / mono for hashes with copy-on-click), evidence rows with status pills, voter rows with truncated mono sigs, and the seal badge at top-right as a 64px disc with a conic brass gradient ring, dark centre, "SV" in Instrument Serif; on tamper the ring turns red and gets a thin crack line (SVG). Verify results as a checklist: each row a glass line with a 20px check icon (green) or an X (red) and a short reason; the final banner is a full-width pill "Seal intact" (green outline) or "Seal broken" (red outline).
+- **Buttons** everywhere: 36px tall, 13px Inter 500, radius 999px; primary = `#f3efe8` bg / dark text; ghost = glass; danger = ghost with red text and border on hover. Focus ring 2px ember at 60%. Hover transitions 150ms.
 
-## Pages
-- **Courtroom:** unchanged layout; docket ribbon on top, evidence tags on the right, writs and brass buttons below. The 3D panel keeps its height rule and gets a 1px brass rim with a darker inset shadow like a framed window.
-- **Results = "The Coroner's Findings."** Kicker in Pirata One, title in Caslon. Stat tiles are three typewritten ledger lines on one form, not three cards. The ILLUSTRATIVE pill becomes a red "SPECIMEN — NOT MEASURED" stamp across the top-right of the ladder form; MEASURED becomes a green "ENTERED INTO RECORD" stamp.
-- **Replay = "Two inquests, one body of evidence."** Two forms side by side pinned with brass pins; the C2 form's verdict gets a red "TAINTED BY HERDING" stamp, C5's a green "HELD". Juror chips are small tags; FLIPPED is a red typewritten note "recanted".
-- **Certificate = the sealed writ.** Parchment with two fold creases (subtle gradients), a red ribbon down the left edge, the wax seal badge at top-right (keep the crack-on-tamper), the checklist as a ledger with ruled lines and PASS/FAIL ink stamps; the raw JSON in a "clerk's copy" details element in typewriter.
-
-## Motion and accessibility
-- Only three motions: stamp press, tag swing-in, candle flicker on orange glows (3s, subtle). All disabled under prefers-reduced-motion.
-- Body text contrast ≥ 4.5:1 on both paper and velvet; stamps may be decorative but their text must still read.
-- Phone width: 16px gutters, tags full-width, tabs scroll horizontally, no horizontal page scroll.
+## Motion
+- Phase change: track segment fills with a 400ms ease; status chip dot pulses once.
+- Speaking juror in the ledger: avatar disc gets an ember ring.
+- Everything respects prefers-reduced-motion.
 
 ## Never
-- No pumpkins, bats, cobwebs, dripping-blood fonts, neon glows, glassmorphism, or orange fills. No generic card grid with 10px radii. No new runtime dependencies.
+Paper textures, stamps, tags, eyelets, folder tabs, typewriter type, blackletter, bevelled brass plates, orange fills, drop shadows on every card, 90s skeuomorphism of any kind.

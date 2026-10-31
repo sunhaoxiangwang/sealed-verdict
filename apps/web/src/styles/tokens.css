@@ -1,49 +1,82 @@
+/* Sealed Verdict, "Night court, modern". Design tokens.
+   Accents carry meaning only: ember = live/active, green = verified, red = forged,
+   amber = uncertain, brass = the seal and the certificate ribbon. */
+
+@property --breath {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0.6;
+}
+
 :root {
-  /* ground and light */
-  --bg: #0b0a0d;
-  --bg-2: #15110f;
-  --plate: #15110f;
-  --panel: #15110f;
-  --stone: #1d1814;
-  --oak: #3a2d20;
-  --oak-2: #5a4430;
-  --candle: #ff8c3a;
-  /* paper and ink */
-  --manila: #d9c48f;
-  --parchment: #e8dcc0;
-  --parchment-2: #cdbd98;
-  --aged: #b89f62;
-  --aged-edge: #8a7340;
-  --carbon: #e6e3da;
-  --ink: #f1ead9;
-  --ink-dim: #b0a48e;
-  --ink-black: #15110f;
-  --ink-paper-dim: #5b4a30;
-  /* hardware */
-  --brass: #c9a24a;
-  --brass-2: #8a6a2a;
-  /* stamps */
-  --wax: #9b1b1b;
-  --wax-2: #c62828;
-  --stamp-red: #9b1b1b;
-  --stamp-green: #2a7344;
-  --stamp-amber: #8f6a0a;
-  --verified: #5ac47c;
-  --forged: #e04b3a;
-  --uncertain: #d7a73b;
-  --true: #5ac47c;
-  --false: #e04b3a;
-  --byzantine: #7fcf5a;
-  --radius: 3px;
-  /* type */
-  --font-blackletter: 'Pirata One', 'Libre Caslon Text', serif;
-  --font-display: 'Libre Caslon Text', Georgia, 'Times New Roman', serif;
-  --font-body: 'Libre Caslon Text', Georgia, 'Times New Roman', serif;
-  --font-type: 'Special Elite', 'Courier New', monospace;
-  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
-  --fs-1: 11px; --fs-2: 13px; --fs-3: 15px; --fs-4: 17px; --fs-5: 22px; --fs-6: 30px; --fs-7: 44px;
-  --ease-out: cubic-bezier(0.2, 0.9, 0.3, 1);
-  /* paper grain: inline SVG feTurbulence at ~5% */
-  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .22 0 0 0 0 .15 0 0 0 0 .07 0 0 0 1.1 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.1'/%3E%3C/svg%3E");
   color-scheme: dark;
+
+  /* ground */
+  --bg: #07060a;
+  --bg-rgb: 7 6 10;
+  --glow-ember: rgb(255 140 58 / 0.10);
+  --glow-violet: rgb(120 80 255 / 0.08);
+
+  /* glass */
+  --glass: rgb(255 255 255 / 0.035);
+  --glass-hover: rgb(255 255 255 / 0.06);
+  --glass-active: rgb(255 255 255 / 0.085);
+  --line: rgb(255 255 255 / 0.08);
+  --line-soft: rgb(255 255 255 / 0.06);
+  --line-strong: rgb(255 255 255 / 0.14);
+  --edge: rgb(255 255 255 / 0.12);
+  --blur: 16px;
+  --lift: inset 0 1px 0 var(--edge);
+  --float: 0 20px 60px rgb(0 0 0 / 0.45);
+
+  /* text. --text-3 is lifted from the spec's #6f6a7a so small tertiary text clears 4.5:1 on glass;
+     --text-4 keeps the original value for non-text uses (idle dots, disabled marks). */
+  --text: #f3efe8;
+  --text-2: #a9a3b3;
+  --text-3: #8a8497;
+  --text-4: #6f6a7a;
+
+  /* accents (meaning only) */
+  --ember: #ff8c3a;
+  --ember-rgb: 255 140 58;
+  --verified: #4ade80;
+  --verified-rgb: 74 222 128;
+  --forged: #f87171;
+  --forged-rgb: 248 113 113;
+  --uncertain: #fbbf24;
+  --uncertain-rgb: 251 191 36;
+  --brass: #d6b36a;
+  --brass-rgb: 214 179 106;
+
+  /* juror avatar hues: four muted hues, kept clear of the semantic accents */
+  --hue-0: 265;
+  --hue-1: 212;
+  --hue-2: 184;
+  --hue-3: 322;
+
+  /* chart data colours (unchanged from v1 so the encoding stays stable) */
+  --data-herded: #c62828;
+  --data-held: #5ac47c;
+  --data-baseline: #8a6a2a;
+  --data-byzantine: #c9a24a;
+  --data-forged: #e04b3a;
+  --grid: rgb(255 255 255 / 0.06);
+
+  /* shape */
+  --r-panel: 16px;
+  --r-card: 14px;
+  --r-input: 10px;
+  --r-pill: 999px;
+
+  /* type */
+  --font-ui: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --font-display: "Instrument Serif", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  /* motion */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --t-fast: 150ms;
+
+  /* layout */
+  --gutter: clamp(16px, 2.5vw, 32px);
 }

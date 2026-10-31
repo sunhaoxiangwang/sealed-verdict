@@ -45,8 +45,8 @@ function RateTooltip({ active, payload, fields }: TipProps & { fields: RateField
 
 /** Grouped (or single-series) bar chart of 0..1 rates shown as percentages. */
 export default function RateBarChart({ conditions, ids, fields, cellColor, height = 260 }: Props) {
-  const oak = token("--oak", "#4a2e1b");
-  const dim = token("--ink-dim", "#a69a86");
+  const grid = token("--grid", "rgba(255, 255, 255, 0.06)");
+  const dim = token("--text-3", "#8a8497");
 
   const picked = ids.map((id) => conditions.find((c) => c.id === id)).filter((c): c is Condition => Boolean(c));
   const rows = picked.map((c) => {
@@ -61,27 +61,17 @@ export default function RateBarChart({ conditions, ids, fields, cellColor, heigh
 
   return (
     <div className="rate-chart">
-      {fields.length > 1 && (
-        <div className="legend" aria-label="Legend">
-          {fields.map((f) => (
-            <span key={f.field}>
-              <i className="legend-swatch" style={{ background: f.color }} />
-              {f.label}
-            </span>
-          ))}
-        </div>
-      )}
       <div className="chart-scroll">
         <div className="chart-inner">
           <ResponsiveContainer width="100%" height={height}>
             <BarChart data={rows} margin={{ top: 12, right: 8, bottom: 0, left: 0 }} barCategoryGap="22%" barGap={4}>
-              <CartesianGrid vertical={false} stroke={oak} strokeOpacity={0.6} />
+              <CartesianGrid vertical={false} stroke={grid} />
               <XAxis
                 dataKey="id"
                 interval={0}
                 height={64}
                 tickLine={false}
-                axisLine={{ stroke: oak }}
+                axisLine={{ stroke: grid }}
                 tick={<CategoryTick labels={labels} />}
               />
               <YAxis
@@ -94,11 +84,11 @@ export default function RateBarChart({ conditions, ids, fields, cellColor, heigh
                 width={44}
               />
               <Tooltip
-                cursor={{ fill: "rgba(232, 220, 192, 0.06)" }}
+                cursor={{ fill: "rgba(255, 255, 255, 0.04)" }}
                 content={(p) => <RateTooltip {...p} fields={fields} />}
               />
               {fields.map((f) => (
-                <Bar key={f.field} dataKey={f.field} name={f.label} fill={f.color} maxBarSize={48} radius={[3, 3, 0, 0]}>
+                <Bar key={f.field} dataKey={f.field} name={f.label} fill={f.color} maxBarSize={48} radius={[4, 4, 0, 0]}>
                   {rows.map((r) => (
                     <Cell key={String(r.id)} fill={cellColor?.(String(r.id)) ?? f.color} />
                   ))}

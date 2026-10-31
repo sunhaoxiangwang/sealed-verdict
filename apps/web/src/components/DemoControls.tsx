@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { injectForgedEvidence, load, makeByzantine, tamperTranscript, usePlayer, type Speed } from "../mock/player";
 import { hasLiveConfig, listRecentCases, subscribeCase } from "../live/supabase";
 import { useTribunal } from "../store/tribunal";
+import { IconFilePlus, IconPause, IconPencil, IconPlay, IconReplay, IconUserX } from "./icons";
 
 const SPEEDS: Speed[] = [1, 2, 4];
 const FALLBACK_CASE = "demo";
@@ -68,53 +69,74 @@ export default function DemoControls() {
     [],
   );
 
-  const badgeTitle = !configured ? "set VITE_SUPABASE_URL" : live ? "Switch to mock" : "Switch to live Supabase events";
+  const badgeTitle = !configured ? "Live mode is off: set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY" : live ? "Switch to mock" : "Switch to live Supabase events";
 
   return (
-    <div className="demo-controls">
-      <button onClick={playing ? pause : play} disabled={live}>{playing ? "Pause" : "Play"}</button>
-      <button onClick={() => { seek(0); play(); }} disabled={live}>Replay</button>
-      <div className="speed" role="group" aria-label="Speed">
-        {SPEEDS.map((s) => (
-          <button key={s} aria-pressed={speed === s} disabled={live} onClick={() => setSpeed(s)}>
-            {s}x
-          </button>
-        ))}
-      </div>
-      <button className="writ" disabled={live} onClick={() => injectForgedEvidence()}>Forge evidence</button>
-      <button className="writ" disabled={live || !target} onClick={() => target && makeByzantine(target)}>Turn juror Byzantine</button>
-      <button className="writ" onClick={() => tamperTranscript()}>Tamper transcript</button>
-      {live && (
-        <input
-          className="case-input"
-          aria-label="Case id"
-          placeholder="case id"
-          value={caseInput}
-          onChange={(e) => setCaseInput(e.target.value)}
-          onKeyDown={(e) => {
-            const id = caseInput.trim();
-            if (e.key === "Enter" && id) connect(id);
-          }}
-        />
-      )}
-      <span title={badgeTitle}>
-        <button
-          className={`source-badge source-${source}`}
-          aria-pressed={live}
-          disabled={!configured}
-          title={badgeTitle}
-          onClick={() => (live ? goMock() : void goLive())}
-        >
-          <span className="toggle-track" aria-hidden="true"><span className="toggle-knob" /></span>
-          <svg className="lantern" width="12" height="18" viewBox="0 0 12 18" aria-hidden="true">
-            <path d="M4 3.5V2.2a2 2 0 0 1 4 0v1.3" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" />
-            <path className="lamp" d="M3 4h6l1.2 9.5H1.8z" strokeWidth="1" strokeLinejoin="round" />
-            <path className="flame" d="M6 6.2c1.4 1.6 1.8 2.6 1.8 3.6A1.8 1.8 0 0 1 4.2 9.8C4.2 8.8 4.6 7.8 6 6.2z" />
-            <path d="M1.5 14.2h9v1.6h-9z" fill="currentColor" opacity=".7" />
-          </svg>
-          <span>{live ? "LIVE" : "MOCK"}</span>
+    <div className="controls" role="group" aria-label="Case controls">
+      <div className="controls-group">
+        <button className="btn btn-primary" onClick={playing ? pause : play} disabled={live}>
+          {playing ? <IconPause /> : <IconPlay />}
+          {playing ? "Pause" : "Play"}
         </button>
-      </span>
+        <button className="btn btn-ghost" onClick={() => { seek(0); play(); }} disabled={live}>
+          <IconReplay />
+          Replay
+        </button>
+        <div className="seg" role="group" aria-label="Speed">
+          {SPEEDS.map((s) => (
+            <button key={s} className="seg-item" aria-pressed={speed === s} disabled={live} onClick={() => setSpeed(s)}>
+              {s}x
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="controls-group controls-attacks" role="group" aria-label="Attacks">
+        <button className="btn btn-ghost btn-danger" disabled={live} onClick={() => injectForgedEvidence()}>
+          <IconFilePlus />
+          Forge evidence
+        </button>
+        <button className="btn btn-ghost btn-danger" disabled={live || !target} onClick={() => target && makeByzantine(target)}>
+          <IconUserX />
+          Byzantine juror
+        </button>
+        <button className="btn btn-ghost btn-danger" onClick={() => tamperTranscript()}>
+          <IconPencil />
+          Tamper transcript
+        </button>
+      </div>
+      <div className="controls-group controls-source">
+        {live && (
+          <input
+            className="field"
+            aria-label="Case id"
+            placeholder="case id"
+            value={caseInput}
+            onChange={(e) => setCaseInput(e.target.value)}
+            onKeyDown={(e) => {
+              const id = caseInput.trim();
+              if (e.key === "Enter" && id) connect(id);
+            }}
+          />
+        )}
+        <span title={badgeTitle}>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={live}
+            aria-label="Live data"
+            className={`switch source-${source}`}
+            disabled={!configured}
+            title={badgeTitle}
+            onClick={() => (live ? goMock() : void goLive())}
+          >
+            <span className="switch-opt">MOCK</span>
+            <span className="switch-track" aria-hidden="true">
+              <span className="switch-knob" />
+            </span>
+            <span className="switch-opt">LIVE</span>
+          </button>
+        </span>
+      </div>
     </div>
   );
 }

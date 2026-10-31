@@ -1,6 +1,10 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { createPlayer, type Speed } from "../mock/player";
 import { createTribunalStore, type Juror, type TribunalStore } from "../store/tribunal";
+import Avatar, { hueIndex } from "../components/Avatar";
+import { LedgerEntry } from "../components/TranscriptFeed";
+import { IconPause, IconPlay, IconReplay } from "../components/icons";
+import { useStickToBottom } from "../components/useStickToBottom";
 import "../styles/replay.css";
 
 // Two independent tribunals: same case, two conditions.
@@ -20,15 +24,17 @@ function chipState(j: Juror, cond: "C2" | "C5") {
   return j.revealed ? "revealed" : j.committed ? "committed" : "waiting";
 }
 
-function Chip({ j, cond }: { j: Juror; cond: "C2" | "C5" }) {
+const voteTone = (v: string) => (v === "true" ? "verified" : v === "false" ? "forged" : v === "uncertain" ? "uncertain" : "neutral");
+
+function Chip({ j, cond, hue }: { j: Juror; cond: "C2" | "C5"; hue: number }) {
   const v = j.vote ?? "unknown";
   return (
     <div className={`rchip vote-${v}`}>
-      <span className="rchip-dot" />
+      <Avatar name={j.pseudonym} hue={hue} speaking={j.speaking} />
       <span className="rchip-name">{j.pseudonym}</span>
-      <span className="rchip-vote">{v}</span>
+      <span className={`pill pill-${voteTone(v)} rchip-vote`}>{v === "unknown" ? "no vote" : v}</span>
       <span className="rchip-state">{chipState(j, cond)}</span>
-      {j.flipped && <span className="rchip-flip">recanted</span>}
+      {j.flipped && <span className="pill pill-forged rchip-flip">flipped</span>}
     </div>
   );
 }
@@ -41,43 +47,38 @@ function Column({ col }: { col: (typeof COLUMNS)[number] }) {
   const messages = s((x) => x.messages);
   const forged = messages.filter((m) => m.kind === "evidence" && !m.verified).length;
   const items = feed.filter((f) => f.kind === "argument" || f.kind === "evidence" || f.kind === "verdict" || f.kind === "reveal");
+  const feedRef = useRef<HTMLDivElement>(null);
+  useStickToBottom(feedRef, items.length);
 
   const banner = cert
     ? col.cond === "C2"
-      ? `Herded to: ${cert.verdict}`
+      ? `Herded to: ${cert.verdict} (${cert.quorum})`
       : `Held: ${cert.verdict} (${cert.quorum} quorum, ${forged} forged item${forged === 1 ? "" : "s"} excluded)`
     : null;
 
   return (
     <section className={`rcol rcol-${col.cond}`} aria-label={col.label}>
-      <header>
+      <header className="rcol-head">
         <h2>{col.label}</h2>
-        <p className="muted">{col.blurb}</p>
+        <p>{col.blurb}</p>
       </header>
-      <div className="rchips">{jurors.map((j) => <Chip key={j.id} j={j} cond={col.cond} />)}</div>
-      <div className="rfeed">
-        {items.length === 0 && <p className="muted">Waiting for play.</p>}
-        {items.map((f) => (
-          <div key={f.id} className={`ritem ritem-${f.kind}`}>
-            <span className="rname">{f.juror ?? f.kind}</span>
-            {f.kind === "evidence" && <span className={`badge ${f.verified ? "verified" : "forged"}`}>{f.verified ? "verified" : "forged"}</span>}
-            <span className="rtext">{f.text}</span>
-          </div>
-        ))}
-      </div>
-      <div className="rverdict">
-        {cert ? <span className="rverdict-line">Verdict: {cert.verdict} ({cert.quorum})</span> : <span className="muted">No verdict yet</span>}
-      </div>
-      {banner && (
-        <div className={`rbanner rbanner-${col.cond}`}>
-          <span className="rbanner-text">{banner}</span>
-          {col.cond === "C2" ? (
-            <span className="stamp stamp-red" style={{ ["--rot" as string]: "-8deg" }}>Tainted by herding</span>
-          ) : (
-            <span className="stamp stamp-green" style={{ ["--rot" as string]: "-6deg" }}>Held</span>
-          )}
+      <div className="rcol-body">
+        <div className="rchips">
+          {jurors.map((j) => (
+            <Chip key={j.id} j={j} cond={col.cond} hue={hueIndex(j.id, jurors)} />
+          ))}
         </div>
-      )}
+        <div ref={feedRef} className="rfeed" tabIndex={0} aria-label={`${col.label} transcript`}>
+          {items.length === 0 && <p className="rfeed-empty">Press Play to run this case.</p>}
+          {items.map((f) => (
+            <LedgerEntry key={f.id} item={f} jurors={jurors} speaking={false} dense />
+          ))}
+        </div>
+        <div className={`verdict-bar rbanner-${col.cond}`} data-tone={banner ? (col.cond === "C2" ? "forged" : "verified") : "none"}>
+          <span className="verdict-text">{banner ?? "No verdict yet"}</span>
+          {banner && (col.cond === "C2" ? <span className="pill pill-forged">Tainted by herding</span> : <span className="pill pill-verified">Held</span>)}
+        </div>
+      </div>
     </section>
   );
 }
@@ -100,18 +101,29 @@ export default function Replay() {
   const both = (f: (p: typeof pC2.player) => void) => { f(pC2.player); f(pC5.player); };
 
   return (
-    <div className="page replay">
-      <p className="kicker">Two inquests, one body of evidence</p>
-      <h1>Same case, two protocols</h1>
-      <div className="demo-controls">
-        <button onClick={() => (playing ? both((p) => p.pause()) : both((p) => p.play()))}>{playing ? "Pause" : "Play"}</button>
-        <button onClick={() => { both((p) => p.seek(0)); both((p) => p.play()); }}>Restart</button>
-        <div className="speed" role="group" aria-label="Speed">
-          {SPEEDS.map((s) => (
-            <button key={s} aria-pressed={speed === s} onClick={() => both((p) => p.speed(s))}>{s}x</button>
-          ))}
+    <div className="replay">
+      <header className="replay-head">
+        <h1>Same case, two protocols</h1>
+        <div className="controls" role="group" aria-label="Replay controls">
+          <div className="controls-group">
+            <button className="btn btn-primary" onClick={() => (playing ? both((p) => p.pause()) : both((p) => p.play()))}>
+              {playing ? <IconPause /> : <IconPlay />}
+              {playing ? "Pause" : "Play"}
+            </button>
+            <button className="btn btn-ghost" onClick={() => { both((p) => p.seek(0)); both((p) => p.play()); }}>
+              <IconReplay />
+              Restart
+            </button>
+            <div className="seg" role="group" aria-label="Speed">
+              {SPEEDS.map((s) => (
+                <button key={s} className="seg-item" aria-pressed={speed === s} onClick={() => both((p) => p.speed(s))}>
+                  {s}x
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
-      </div>
+      </header>
       <div className="rgrid">
         {COLUMNS.map((c) => <Column key={c.cond} col={c} />)}
       </div>
