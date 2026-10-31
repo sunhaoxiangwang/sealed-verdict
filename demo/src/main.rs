@@ -1,4 +1,4 @@
-//! Sealed Verdict AML eval: alert -> triage -> investigation + RFI -> panel -> four-eyes -> lookback, under C0..C5.
+//! Sealed Verdict AML demo: alert -> triage -> investigation + RFI -> panel -> four-eyes -> lookback, under C0..C5.
 //!
 //!   sv-aml build  [--ibm-trans HI-Small_Trans.csv [--ibm-patterns HI-Small_Patterns.txt]] [--n 200]
 //!   sv-aml run    [--cond C0,C1,C2,C3,C4,C5] [--backend mock|py] [--provider anthropic] [--panel local|relay]
@@ -15,8 +15,8 @@ use serde_json::{Value, json};
 use std::{env, fs, path::PathBuf, sync::{Mutex, atomic::{AtomicUsize, Ordering}}};
 use workflow::{LABELS, Opts};
 
-fn eval_dir() -> PathBuf {
-    PathBuf::from(concat!(env!("CARGO_MANIFEST_DIR"), "/.."))
+fn demo_dir() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
 }
 
 fn read_cases(path: &PathBuf) -> Vec<data::AmlCase> {
@@ -68,8 +68,8 @@ fn main() {
     let args: Vec<String> = env::args().skip(1).collect();
     let opt = |k: &str| args.iter().position(|a| *a == format!("--{k}")).and_then(|i| args.get(i + 1)).cloned();
     let num = |k: &str, d: usize| opt(k).and_then(|v| v.parse().ok()).unwrap_or(d);
-    let cases_path = opt("cases").map(PathBuf::from).unwrap_or(eval_dir().join("data/aml/cases.jsonl"));
-    let results = opt("results").map(PathBuf::from).unwrap_or(eval_dir().join("results/aml"));
+    let cases_path = opt("cases").map(PathBuf::from).unwrap_or(demo_dir().join("data/cases.jsonl"));
+    let results = opt("results").map(PathBuf::from).unwrap_or(demo_dir().join("results"));
     let opts = Opts { mock: opt("backend").as_deref().unwrap_or("mock") == "mock", provider: opt("provider").unwrap_or("anthropic".into()),
                       rounds: num("rounds", 2) as u32, relay: opt("panel").as_deref() == Some("relay") };
 

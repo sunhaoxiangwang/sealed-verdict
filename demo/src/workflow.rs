@@ -64,16 +64,16 @@ impl Opts {
     }
 }
 
-/// FFI into the Python agent layer (eval/aml_agent.py): JSON string in, string out.
+/// FFI into the Python agent layer (demo/python/aml_agent.py): JSON string in, string out.
 pub mod py {
     #[cfg(feature = "py")]
     pub fn call(func: &str, arg: &str) -> Result<String, String> {
         use pyo3::prelude::*;
-        const EVAL_DIR: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/..");
+        const PY_DIR: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/python");
         Python::attach(|py| -> PyResult<String> {
             let path = py.import("sys")?.getattr("path")?;
-            if !path.contains(EVAL_DIR)? {
-                path.call_method1("insert", (0, EVAL_DIR))?;
+            if !path.contains(PY_DIR)? {
+                path.call_method1("insert", (0, PY_DIR))?;
             }
             py.import("aml_agent")?.call_method1(func, (arg,))?.extract()
         })

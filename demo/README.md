@@ -1,13 +1,13 @@
-# eval/aml: the AML case-review eval, in Rust
+# demo/: the AML case-review demo and eval, in Rust
 
 Runs each alert through the six stages of `Sealed Verdict AML Case Review.md` (alert, L1 triage, investigation and RFI, panel, four-eyes, lookback) under the same C0 to C5 ladder as the BBQ eval. Then it scores the results.
 
 ```bash
-cd eval/aml
+cd demo
 cargo test --release                       # SPEC §10 vectors, Clerk gate, crash resume, end-to-end mock run
-cargo run --release -- build               # data/aml/cases.jsonl: 200 alerts x 3 arms
-cargo run --release -- run                 # mock jurors, all six conditions -> results/aml/verdicts_*.jsonl
-cargo run --release -- score               # results/aml/results.json + results_table.md
+cargo run --release -- build               # data/cases.jsonl: 200 alerts x 3 arms
+cargo run --release -- run                 # mock jurors, all six conditions -> results/verdicts_*.jsonl
+cargo run --release -- score               # results/results.json + results_table.md
 cargo run --release -- demo                # the 7-step demo on one laundering and one clean case
 cargo run --release -- verify <events.json>   # or: serve --port 8787, then POST /verify
 
@@ -26,9 +26,9 @@ PYO3_PYTHON=python3 cargo run --release --features py -- run --backend py --pane
 | Piece | File | Swap point |
 |---|---|---|
 | Durable actors: AlertCase (Clerk, Ledger, SAR clock), Juror (keypair, nonce, sealed vote) | `src/actors.rs` | `Store` is one JSON file per actor. Replace it with the Durable Actors SDK. |
-| Oracle, ledger, certificate, verify | `src/trust.rs` | Demo keys come from public seeds. The oracle seed is the same as `oracle.py`'s. Replace them with the key registry. |
+| Oracle, ledger, certificate, verify | `src/trust.rs` | Demo keys come from public seeds. The oracle seed is the same as `eval/oracle.py`'s. Replace them with the key registry. |
 | Signature format | `src/trust.rs` | Byte-compatible with `apps/web/src/protocol/crypto.ts` (PR #2). Event files load into the courtroom and `audit.ts`. |
-| Python agent layer | `../aml_agent.py` | `complete`, `model`, `relay_panel` (PR #1) |
+| Python agent layer | `python/aml_agent.py` | `complete`, `model`, `relay_panel` (PR #1) |
 
 **Caveats.**
 - The human officer is simulated and countersigns the panel's decision.
