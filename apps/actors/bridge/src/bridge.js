@@ -10,6 +10,7 @@ import { DaemonClient, DaemonError } from "./daemon-client.js";
 import { createCaseQueue } from "./queue.js";
 import { channelName, connectBridge, publish, onChannelEnvelope, onDirectIntent, jurorClient } from "./relay.js";
 import { createTerse } from "./terse.js";
+import { generateRecipientKeypair, sealIntent, openIntent, isEncryptedIntent, INTENT_ENC_VERSION } from "./intent-crypto.js";
 
 const ADMITTED_KINDS = new Set(["evidence", "commit", "reveal", "argument"]);
 const TICK_MS = 250;
@@ -36,13 +37,18 @@ export async function runLiveCase(opts) {
 
   const conn = await connectBridge({ ...relayOpts, caseId, jurorIds });
   log(`relay ready: clerk ${conn.clerkId}, ${conn.jurors.size} jurors, ${conn.channels.length} channels`);
+  // Fresh per-case recipient key for sealed intents; the private half never leaves this process.
+  const recipient = generateRecipientKeypair();
   if (tokensDir) {
-    // Private handoff for teammate juror processes: one file, never logged.
+    // Private handoff for teammate juror processes: tokens and the pinned recipient key, never logged.
     mkdirSync(tokensDir, { recursive: true, mode: 0o700 });
     const file = path.join(tokensDir, `${caseId}.json`);
     const handoff = Object.fromEntries([...conn.jurors].map(([id, j]) => [id, { senderId: j.id, agentToken: j.token }]));
-    writeFileSync(file, JSON.stringify({ caseId, baseUrl: relayOpts.baseUrl, clerkName: conn.clerkName, jurors: handoff }, null, 2) + "\n", { mode: 0o600 });
-    log(`juror tokens written to ${file}`);
+    writeFileSync(file, JSON.stringify({
+      caseId, condition, baseUrl: relayOpts.baseUrl, clerkName: conn.clerkName,
+      encryption: INTENT_ENC_VERSION, recipientPublicKey: recipient.publicKeyHex, jurors: handoff,
+    }, null, 2) + "\n", { mode: 0o600 });
+    log(`juror handoff written to ${file}`);
   }
 
   const jurorNameBySender = new Map([...conn.jurors].map(([, j]) => [j.id, j.name]));
@@ -53,7 +59,7 @@ export async function runLiveCase(opts) {
   };
   const terse = typeof terseOpts?.appendEntry === "function" ? terseOpts : await createTerse(terseOpts);
   const queue = createCaseQueue({ onAbort: (e) => log(`ABORT: ${e.message}`) });
-  const stats = { accepted: 0, rejected: 0, unattested: 0, intents: 0, intentErrors: 0, ignoredDms: 0, closes: 0 };
+  const stats = { accepted: 0, rejected: 0, unattested: 0, intents: 0, intentErrors: 0, plaintextRejected: 0, undecryptable: 0, ignoredDms: 0, closes: 0 };
   const seqToMessage = {};
   const finalPath = path.join(outDir, `${caseId}.json`);
   const finalSidecar = path.join(outDir, `${caseId}.relay.json`);
@@ -90,8 +96,8 @@ export async function runLiveCase(opts) {
   await terse.openCase(caseId, opened.registry, opened.phase, opened.head);
   log(`case ${caseId} open in Terse; attest window until ${opened.phase.deadlineMs}`);
 
-  const hookCtx = { caseId, clerkId: conn.clerkId, clerkName: conn.clerkName, jurors: conn.jurors, baseUrl: relayOpts.baseUrl };
-  const scriptedJurors = scripted ? await startScriptedJurors(conn, relayOpts, scripted) : null;
+  const hookCtx = { caseId, condition, clerkId: conn.clerkId, clerkName: conn.clerkName, jurors: conn.jurors, baseUrl: relayOpts.baseUrl, recipientPublicKey: recipient.publicKeyHex };
+  const scriptedJurors = scripted ? await startScriptedJurors(conn, relayOpts, scripted, { caseId, recipientPublicKeyHex: recipient.publicKeyHex }) : null;
   const intruderAgent = intruder ? await prepareIntruder(conn, relayOpts, caseId, jurorIds[0]) : null;
 
   const unsubChannel = onChannelEnvelope(conn.relay, caseId, ({ kind, round, messageId, fromId, obj, parseError }) => {
@@ -118,7 +124,20 @@ export async function runLiveCase(opts) {
     queue.run(`intent:${messageId}`, async () => {
       stats.intents += 1;
       if (parseError || !obj || typeof obj !== "object") throw new DaemonError("bad_request", "intent is not a JSON object");
-      const { kind, round, vote, confidence, text, evidenceIds } = obj;
+      let intent = obj;
+      if (isEncryptedIntent(obj)) {
+        try {
+          intent = openIntent({ recipientPrivateKey: recipient.privateKey, caseId, senderId: fromId, envelope: obj });
+        } catch {
+          stats.undecryptable += 1;
+          throw new DaemonError("intent_invalid", "sealed intent rejected");
+        }
+      } else if (condition !== "C2") {
+        stats.plaintextRejected += 1;
+        throw new DaemonError("intent_not_encrypted", "conditions C3 to C5 require sealed intents");
+      }
+      if (!intent || typeof intent !== "object") throw new DaemonError("bad_request", "intent is not a JSON object");
+      const { kind, round, vote, confidence, text, evidenceIds } = intent;
       const signed = await daemon.sign({ sender: fromId, kind, round, vote, confidence, text, evidenceIds });
       const channel = channelName(caseId, signed.channel.kind, signed.channel.round);
       const { messageId: published } = await publish(conn.clerk, channel, signed.envelope);
@@ -126,8 +145,9 @@ export async function runLiveCase(opts) {
     }).catch(async (e) => {
       stats.intentErrors += 1;
       if (e instanceof DaemonError && e.code !== "daemon_exit") {
+        // Code only: acknowledgements and logs never carry votes, nonces, or decrypted content.
         log(`intent from ${fromId} rejected: ${e.code}`);
-        await reply({ ok: false, error: { code: e.code, message: e.detail } }).catch(() => {});
+        await reply({ ok: false, error: { code: e.code } }).catch(() => {});
       } else abort(e);
     });
   });
@@ -193,14 +213,16 @@ export async function runLiveCase(opts) {
   }
 }
 
-/** Demo jurors living in this process but acting only through their own Relay tokens. */
-async function startScriptedJurors(conn, relayOpts, scripted) {
+/** Demo jurors living in this process but acting only through their own Relay tokens and sealed intents. */
+async function startScriptedJurors(conn, relayOpts, scripted, { caseId, recipientPublicKeyHex }) {
   const clients = new Map();
   for (const [jurorId, j] of conn.jurors) {
     clients.set(jurorId, jurorClient({ agentToken: j.token, baseUrl: relayOpts.baseUrl }));
   }
   const dm = async (jurorId, intent) => {
-    await clients.get(jurorId).dm(conn.clerkName, JSON.stringify(intent));
+    const senderId = conn.jurors.get(jurorId).id;
+    const sealed = sealIntent({ recipientPublicKeyHex, caseId, senderId, intent });
+    await clients.get(jurorId).dm(conn.clerkName, JSON.stringify(sealed));
   };
   return {
     onPhase(next) {
@@ -208,7 +230,7 @@ async function startScriptedJurors(conn, relayOpts, scripted) {
       for (const [jurorId, plan] of Object.entries(scripted.jurors)) {
         const task = (async () => {
           if (phase === "commit" && plan.votes[round] != null) {
-            await dm(jurorId, { kind: "commit", round, vote: plan.votes[round], confidence: plan.confidence ?? 70 });
+            await dm(jurorId, { kind: "commit", round, vote: plan.votes[round], confidence: plan.confidence ?? 70, ...(plan.note ? { note: plan.note } : {}) });
           } else if (phase === "reveal" && plan.votes[round] != null) {
             await dm(jurorId, { kind: "reveal", round });
           } else if (phase === "deliberate" && plan.argument) {

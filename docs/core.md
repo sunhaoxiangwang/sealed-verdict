@@ -549,6 +549,46 @@ matches. Plaintext votes and nonces never appear on a public
 channel before the reveal window; the acceptance test
 `apps/actors/bridge/test/live-e2e.mjs` checks every public channel for this.
 
+### Sealed intents
+
+A confirmed limit of the transport drives this layer: on the pinned local
+engine (`@relaycast/engine` 12.3.0 with SDK 15.0.1) any registered agent in
+the workspace can retrieve the full body of another pair's DM through
+workspace search, verified by probe. A plaintext commit intent would
+therefore be readable by every other juror and by an intruder during the
+commit window. Under conditions C3 to C5 the bridge accepts only sealed
+intents; C2, the no-authentication baseline, still accepts plaintext.
+
+Helper: `apps/actors/bridge/src/intent-crypto.js`, Node built-in crypto
+only. Wire format and derivation:
+
+```
+envelope = { enc: "sv-intent-v1", epk: hex(32), iv: hex(12), ct: hex(ciphertext || 16-byte GCM tag) }
+context  = UTF8("sv-intent-v1\n" + caseId + "\n" + senderId + "\n" + epkHex)
+shared   = X25519(ephemeral private, recipient public)        fresh ephemeral pair per intent
+key      = HKDF-SHA256(ikm = shared, salt = UTF8("sealed-verdict/intent/v1"), info = context, 32 bytes)
+ct       = AES-256-GCM(key, iv = 12 random bytes, aad = context, plaintext = UTF8(JSON intent))
+```
+
+`senderId` is the juror's registered Relay id, so a captured envelope cannot
+be replayed by another sender or against another case; version, caseId and
+sender are bound through both the key derivation and the authenticated
+data. The recipient keypair is generated per case inside the bridge and the
+private half never leaves the process. Jurors obtain the recipient public
+key only from Leo's private handoff file (`.tokens/<caseId>.json`, field
+`recipientPublicKey`, alongside `encryption`, `senderId` and the agent
+token); nothing published on a channel is an authority for that key. The
+bridge decrypts only for the authenticated sender of the DM. A plaintext
+intent under C3 to C5 is answered `intent_not_encrypted`; an envelope that
+fails to open is answered `intent_invalid` with no further detail, and the
+case continues. Acknowledgements and logs carry error codes only, never
+votes, nonces, or decrypted content.
+
+The live acceptance test measures this during the commit/0 window before
+any reveal is published: a plaintext control DM is found by an unrelated
+agent's search, the sealed ballots and a probe inside one of them are not,
+and a captured envelope cannot be opened with a wrong key.
+
 Credentials: the workspace key (`RELAY_WORKSPACE_KEY`) stays in the bridge.
 Jurors receive only their own agent token through a private handoff file
 (`apps/actors/bridge/.tokens/<caseId>.json`, gitignored, mode 600) and
@@ -582,6 +622,15 @@ WP2; hosted deployment is a later step.
 - **Central key custody in live mode.** The daemon signs juror ballots on
   behalf of authenticated Relay senders; jurors never hold their own protocol
   keys in WP2.
+- **Transport confidentiality.** DM bodies are searchable by every agent in
+  the Relay workspace on the pinned local engine, which is why intents are
+  sealed under C3 to C5. Confidentiality was measured only against another
+  agent inside the same local workspace; it is not tested against parties
+  outside the workspace, against the engine operator, or on the hosted
+  service. Rejected public content remains readable by everyone, and a
+  participant can always disclose its own vote voluntarily; no channel
+  permission can prevent that, and the Clerk only guarantees that nothing
+  unauthorized is counted.
 - **No recovery.** Daemon or persistence failure aborts the live case. Keys
   live only in the daemon process and are not reconstructed from registry or
   transcript data; the next attempt is a new case id.

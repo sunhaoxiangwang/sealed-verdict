@@ -91,17 +91,26 @@ and exposed only after the certificate verifies natively and Terse has
 stored it; if either step fails the run exits non-zero and removes this
 case's staged and final files, and nothing is published on the cert channel.
 
-Juror interface for the jurors team: connect with your own agent token
-(`createAgentClient({ agentToken, baseUrl })` from `@agent-relay/sdk/messaging`),
-read phase changes on `sv-<caseId>-phase` and evidence on
-`sv-<caseId>-evidence`, and send signing intents as a DM to the clerk agent
-`sv-<caseId>-clerk`: `{ "kind": "commit", "round": 0, "vote": "ans2",
-"confidence": 70 }`, then `{ "kind": "reveal", "round": 0 }` once the reveal
-window opens, and `{ "kind": "argument", "round": 0, "text": "...",
-"evidenceIds": ["ev-0"] }` during deliberation. The bridge replies by DM with
-`{ ok, kind, round, messageId }` or `{ ok: false, error }`. Byzantine jurors
-may post raw envelopes directly to the public channels; the Clerk rejects or
-tags them.
+Juror interface for the jurors team: Leo's private handoff file
+(`apps/actors/bridge/.tokens/<caseId>.json`) gives each juror its
+`agentToken`, its `senderId`, the `clerkName`, and the case
+`recipientPublicKey`. Connect with `createAgentClient({ agentToken, baseUrl })`
+from `@agent-relay/sdk/messaging`, read phase changes on `sv-<caseId>-phase`
+and evidence on `sv-<caseId>-evidence`, and send signing intents as a DM to
+the clerk agent. Under C3 to C5 the intent must be sealed with
+`sealIntent({ recipientPublicKeyHex, caseId, senderId, intent })` from
+`apps/actors/bridge/src/intent-crypto.js` (Node built-in crypto, no
+dependencies); plaintext is refused with `intent_not_encrypted`. Intents:
+`{ "kind": "commit", "round": 0, "vote": "ans2", "confidence": 70 }`, then
+`{ "kind": "reveal", "round": 0 }` once the reveal window opens, and
+`{ "kind": "argument", "round": 0, "text": "...", "evidenceIds": ["ev-0"] }`
+during deliberation. The bridge replies by DM with `{ ok, kind, round,
+messageId }` or `{ ok: false, error: { code } }`. Byzantine jurors may post
+raw envelopes directly to the public channels; the Clerk rejects or tags
+them. Why sealed: on the local Relay engine any workspace agent can read DM
+bodies through search, so plaintext ballots would not be blind. Rejected
+public content stays readable and a juror can always announce its own vote;
+see docs/core.md for the exact limits.
 
 ## Environment variables
 
