@@ -16,7 +16,7 @@
 .rchip-vote { grid-area: vote; color: var(--vc); text-transform: uppercase; font-weight: 500; }
 .rchip-state { grid-area: state; color: var(--ink-paper-dim); text-transform: uppercase; font-size: 10px; }
 .rchip-flip { grid-area: flip; justify-self: end; font-family: var(--font-type); font-size: var(--fs-2); letter-spacing: 0.04em; color: var(--stamp-red); transform: rotate(-4deg); text-decoration: underline wavy; text-decoration-thickness: 1px; text-underline-offset: 3px; }
-.rfeed { display: flex; flex-direction: column; gap: 0; min-height: 220px; max-height: 340px; overflow-y: auto; padding: 4px 10px; color: var(--ink-black); background: var(--grain), repeating-linear-gradient(180deg, var(--parchment) 0 27px, rgba(138, 115, 64, 0.5) 27px 28px); border-radius: 2px; box-shadow: inset 0 2px 6px rgba(21, 17, 15, 0.35), inset -1px -1px 0 var(--aged-edge); }
+.rfeed { display: flex; flex-direction: column; gap: 0; min-height: 220px; max-height: 340px; overflow-y: auto; padding: 4px 10px; color: var(--ink-black); background: var(--grain), var(--parchment); border-radius: 2px; box-shadow: inset 0 2px 6px rgba(21, 17, 15, 0.35), inset -1px -1px 0 var(--aged-edge); }
 .rfeed .muted { color: var(--ink-paper-dim); }
 .ritem { padding: 5px 0; font-size: var(--fs-3); line-height: 1.5; overflow-wrap: anywhere; border-bottom: 1px solid rgba(138, 115, 64, 0.5); }
 .ritem:last-child { border-bottom: 0; }

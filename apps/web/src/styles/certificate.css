@@ -35,7 +35,7 @@
   box-shadow: inset 0 3px 6px rgba(255, 255, 255, 0.25), inset 0 -5px 10px rgba(0, 0, 0, 0.5), 0 3px 8px rgba(0, 0, 0, 0.45);
 }
 .seal::before { content: ""; position: absolute; inset: 7px; border-radius: 50%; border: 2px solid rgba(0, 0, 0, 0.25); box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.35); }
-.seal span { font-family: var(--font-blackletter); font-size: 34px; line-height: 1; color: rgba(255, 224, 205, 0.88); text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.6); }
+.seal span { font-family: var(--font-display); font-weight: 700; font-size: 30px; line-height: 1; color: rgba(255, 224, 205, 0.88); text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.6); }
 .seal::after { content: none; }
 .seal-cracked { filter: saturate(0.6) brightness(0.8); transform: rotate(-6deg); transition: transform 0.4s; }
 .seal-cracked::after {
@@ -66,7 +66,7 @@
   .cert-ribbon { left: 12px; width: 14px; }
   .cert-title { padding-right: 84px; }
   .seal { width: 64px; height: 64px; top: 16px; right: 14px; }
-  .seal span { font-size: 28px; }
+  .seal span { font-size: 25px; }
   .cert-grid { grid-template-columns: minmax(0, 1fr); gap: 2px; }
   .cert-grid dd { margin-bottom: 8px; }
   .audit-list li { grid-template-columns: 64px minmax(0, 1fr); }
