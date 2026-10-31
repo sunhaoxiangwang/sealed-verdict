@@ -29,9 +29,10 @@ class Provider:
                 break
             except urllib.error.HTTPError as e:
                 body = e.read().decode(errors="replace")
-                if e.code == 400 and "temperature" in body and not self.no_temperature:
-                    print(f"[{self.name}/{self.model}] rejects temperature; dropping it for this run")
-                    self.no_temperature = True
+                if e.code == 400 and "temperature" in body and attempt < 5:
+                    if not self.no_temperature:
+                        print(f"[{self.name}/{self.model}] rejects temperature; dropping it for this run")
+                    self.no_temperature = True  # retry now; in-flight siblings hit this too
                     continue
                 if e.code != 429 and e.code < 500 or attempt == 5:
                     raise RuntimeError(f"HTTP {e.code}: {body[:300]}") from None

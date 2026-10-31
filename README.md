@@ -1,100 +1,130 @@
 # Sealed Verdict
 
-Multi-agent debate makes LLM bias worse: jurors read each other and herd. Sealed
+## Live AML demo (real providers, Relay, hosted Terse, Rust, browser)
+
+Run `pnpm demo:setup` once, then `pnpm demo:live` and open
+**http://localhost:8090**. Click **Run AML case**, then **Conclusion** →
+**Verify with Rust/WASM**. `pnpm demo:check` verifies the completed run and
+confirms that editing an argument breaks verification.
+
+For recording, use **Download example case** or save
+[td-bank-public-case.json](demo/data/td-bank-public-case.json), select it with
+**Upload case (JSON)**, then click **Run AML case**. The screen displays the
+input evidence and a plain-language conclusion with the final agents' supporting
+judgment. Uploaded JSON uses the example's schema; evidence excerpts are limited
+to 240 characters each so the protocol admits them without truncation.
+
+Keys are read server-side from `.env`: `OPENAI_API_KEY`, `GEMINI_API_KEY`,
+`ANTHROPIC_API_KEY`, `TERSE_API_KEY`. Set `TERSE_ACTOR_URL` to your deployed
+CaseActor endpoint; a machine-specific `.env.live` may hold that endpoint.
+Without a hosted endpoint the launcher starts the real local Terse runtime.
+Relay runs locally unless `RELAY_BASE_URL` and `RELAY_WORKSPACE_KEY` are set.
+
+The input is [a real public DOJ AML case](demo/data/td-bank-public-case.json):
+TD Bank's nominee-account cash network. It contains sourced aggregate facts,
+not synthetic transactions or private bank records. Python calls OpenAI for
+triage, Gemini for investigation/RFI gaps, and a four-juror panel spanning
+OpenAI, Gemini and Anthropic. Every panel message travels through Relay;
+the Rust Clerk admits it and Terse persists it. Phases close when all required
+messages are admitted, or at the deadline. The browser reads persisted state
+and verifies the original bundle with the Rust WASM verifier. Failed API calls
+stop the run; no mock fallback exists. Human review remains pending and no SAR
+is filed. Existing synthetic experiments remain separate from this demo.
+
+Defaults: `gpt-5-mini`, `gemini-3.5-flash-lite`, `claude-haiku-4-5-20251001`.
+Override with `OPENAI_MODEL`, `GEMINI_MODEL`, `ANTHROPIC_MODEL`.
+
+For **SuperServe**, install its CLI (`curl -fsSL https://superserve.ai/install | sh`),
+set `SUPERSERVE_API_KEY` in `.env` (or run `superserve login`), then
+`pnpm demo:superserve`. A repository-local install
+at `.runtime/bin/superserve` is also supported. The deployment command packages
+the app, builds its Rust executable and frontend in a new sandbox, passes only the required
+runtime environment, and publishes port 8090 privately. It prints the command
+to open a signed browser URL. A hosted Terse endpoint is required. See the
+[official CLI documentation](https://docs.superserve.ai/cli) for authentication.
+
+**Supabase location:** the private Storage bucket `sealed-verdict` in your
+`VITE_SUPABASE_URL` project. `cases/<caseId>.json` contains the completed case,
+original certificate, transcript and provider metadata; `latest.json` makes
+the last completed case available immediately after a fresh deployment.
+The backend uses `SUPABASE_API_KEY`; the browser reads through `/api/aml` and
+never receives that secret. Terse remains the live protocol state; Supabase
+archives completed cases. No public storage policy or database migration is
+needed. `VITE_SUPABASE_ANON_KEY` is the public client credential, not a server key.
+
+**SuperServe location:** a sandbox named `sealed-verdict-<runId>`, with the
+application in `/home/user/sealed-verdict` and the workflow server listening on
+port 8090. Only its private preview port is published. The sandbox pauses
+after one hour; resume it with `superserve sandbox resume <name>`.
+
+Multi-agent debate can let jurors anchor on each other’s judgments. Sealed
 Verdict runs LLM jurors as a tribunal under a commit-reveal protocol, carries
 every message over Agent Relay, keeps each case's state in a Terse durable
 actor, and ships every verdict with a certificate that anyone can verify
 offline, in Rust or in the browser through the same WebAssembly verifier.
 
-## Why we deserve each 20% of the rubric
+## Recording evidence for the judging rubric
+
+The [recording plan and presenter script](demo/RECORDING.md) map every criterion
+to visible evidence. The live AML recording uses one case ID throughout;
+shortened model waits are labelled in the edited version.
 
 ### Use of Real-Time AI and Track Technology (20%)
 
-*How meaningfully does the project use AI in real time? For the Terse and
-Agent Relay track prizes, how effectively does it use the corresponding
-technology?*
-
-The AI is the jury: four LLM jurors (`apps/jurors`, real models when
-`OPENAI_API_KEY` is set) read the case, commit to a blind vote, reveal, argue
-with each other citing attested evidence, and vote again, all live on Agent
-Relay. Every protocol message is a Relay message on a per-case channel
-(`sv-<caseId>-evidence`, `commit-<round>`, `reveal-<round>`, `argument`,
-`phase`, `cert`), ballots travel as sealed Relay DMs to the Clerk agent, and the
-Clerk admits nothing it did not receive from Relay. Each case is a Terse
-durable actor holding the registry, the open phase and its deadline, every
-ledger entry, and the final certificate while the case runs, so jurors and the
-frontend read live state from Terse instead of from the process that produced
-it, and the Clerk persists each transition to Terse before announcing the next
-phase. Neither sponsor platform is decorative: Relay is the only transport and
-Terse is the only durable state. Both integrations are verified end to end
-against local Relay and Terse runtimes; hosted operation is not yet verified.
+The Python workflow calls OpenAI for triage, Gemini for investigation, and
+four jurors spanning OpenAI, Gemini and Anthropic for the panel. It never
+falls back to mock votes. Agent Relay carries encrypted ballot intents,
+evidence envelopes, commitments, reveals, arguments, phase announcements and
+the certificate. The Rust Clerk admits messages received from Relay. Hosted
+Terse stores the registry, phase, transcript and certificate; every admitted
+entry and transition is persisted before the bridge proceeds. The recording
+shows live model responses, phase changes and actual backend counters.
+SuperServe hosts the connected application; Supabase privately archives the
+completed bundle. Hosted Terse and the deployed frontend have been exercised
+with real-model AML ballots.
 
 ### Originality and Creativity (20%)
 
-*How fresh and inventive is the idea? Does it demonstrate an unexpected or
-creative use of real-time AI?*
-
-Most multi-agent demos make agents talk. We make them vote under rules that
-survive a dishonest participant. The jury is a protocol, not a prompt: blind
-ballots are hash commitments bound to fresh nonces, reveals open only after a
-Clerk-signed phase close, evidence is Oracle-attested and anything unsigned is
-tagged UNATTESTED and weighs nothing, the whole transcript is a hash chain, and
-the verifier replays that transcript rather than trusting the Clerk. The
-creative turn came from the platform itself: we found that any agent in a
-Relay workspace can read DM bodies through search, so we sealed ballots end to
-end (X25519, HKDF, AES-256-GCM, bound to case and sender) and turned a
-transport limitation into a demonstrable security property.
+The distinctive mechanism is independent judgment before discussion. Jurors
+commit to hidden ballots, reveal after a signed phase close, publish their
+initial evidence-based reasoning, and reassess after seeing peer arguments.
+Encrypted intents prevent the local Relay engine's searchable DM bodies from
+exposing ballot contents. A signed transcript and replayable certificate
+make protocol compliance independently checkable. The recording shows this
+mechanism; it does not claim that one case establishes reduced bias.
 
 ### Execution and Demo (20%)
 
-*How well does the project work? Consider functionality, polish, and how
-clearly and convincingly the demo communicates the concept.*
-
-It runs. `cargo run --bin run_case` produces a verifiable case in memory in
-under a second; `node src/run-live.js` runs the same protocol over live Relay
-and Terse and exits non-zero unless the certificate verifies; three public
-fixtures (valid, tampered by a single word, NO_QUORUM) verify identically in
-Rust and in WebAssembly. The suites cover protocol replay, actors, the daemon
-contract, the Relay and Terse integrations, the sealed-ballot cryptography,
-and live end-to-end cases with a forging fifth agent, an injected persistence
-failure, and an early reveal attempt. The demo (`apps/web/README.md`) plays a
-case in the courtroom, flips a juror Byzantine and shows the quorum hold,
-verifies the certificate and breaks it with one tampered word, and replays the
-same case under open debate (C2) next to the signed protocol (C5).
+A fresh run starts from documented public DOJ AML facts, obtains real model
+responses, transports panel messages over Relay, persists state in Terse,
+and produces a Rust-verified certificate. The recording follows the same
+case through the frontend and backend. The browser's Rust/WASM verifier
+passes the original, rejects an edited argument, and passes the restored
+original. `pnpm demo:check` independently checks four final ballots, provider
+participation, admission errors, certificate validity and tamper rejection.
+Older scripted fixtures and synthetic comparisons are separate tests, not
+results from the live AML case.
 
 ### User Experience and Design (20%)
 
-*Is the experience intuitive, cohesive, and thoughtfully designed? Does the
-design support the project's intended use?*
-
-The design makes an invisible guarantee visible. A 3D courtroom gives each
-phase a physical moment: evidence is attested (a forged item shows red),
-sealed commits land, reveals open, deliberation plays, the seal drops. The
-certificate page turns verification into five checks a judge can watch pass,
-and a Tamper button cracks the seal so the audience sees what the hash chain
-protects. The C2-versus-C5 replay puts herding and the protocol side by side,
-and the results ladder walks the conditions in order. Underneath, the backend
-hands the frontend one JSON bundle per case and a single `verifyCert` call
-that runs in the browser, so the interface never has to trust a server to
-say "verified".
+The courtroom connects abstract protocol steps to visible states: evidence,
+sealed commitments, reveals, discussion and verdict. The source is linked,
+progress is shown in the phase ribbon and transcript, and one Run button
+starts the workflow. Certificate actions verify, tamper with a local copy,
+restore the original, and download the complete bundle. Missing credentials
+and failed calls appear as errors rather than a fabricated successful run.
+The recording demonstrates these actions in the deployed frontend.
 
 ### Potential and Impact (20%)
 
-*Does the project address a meaningful problem or demonstrate a compelling use
-case? Could the idea be developed further?*
-
-AI deliberation is already being used to judge content, grade work, and
-screen people, and our thesis is that letting models read each other
-amplifies bias rather than cancelling it. A verdict that ships with a
-replayable certificate turns "the model said so" into an auditable record of
-who was allowed to speak, what evidence was attested, and how the quorum was
-reached, which is what a regulator, an appeals process, or a downstream model
-needs. The protocol is model-agnostic and transport-agnostic in design, the
-verifier already runs in any browser, and the preregistered evaluation
-(`eval/`) is built to measure the bias claim across BBQ, position bias, and
-forged-evidence arms. The runs in this repository are scripted integration
-evidence; measured results with real-model jurors come from that evaluation
-and are labelled as illustrative until they land.
+AML reviewers need to understand why an AI system recommended escalation.
+The case bundle preserves supplied evidence, signed ballots and the sequence
+of protocol decisions for review. The public enforcement case demonstrates
+that workflow without inventing private transactions or customer responses.
+Private bank-data intake and authenticated human sign-off are proposed next
+steps. Human review remains pending in this prototype; it does not file a
+SAR. Signatures establish protocol integrity, not factual correctness,
+regulatory compliance, improved accuracy or a measured reduction in bias.
 
 ## Repository structure and ownership
 

@@ -18,7 +18,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use sealed_verdict_protocol::{
     verify_cert_typed, Condition, EntryKind, Evidence, JurorEntry, LedgerEntry, Phase, Registry,
-    Signed,
+    Signed, EntryStatus,
 };
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
@@ -63,6 +63,8 @@ struct OpenParams {
     jurors: Vec<JurorParam>,
     #[serde(default)]
     timeout_ms: Option<u64>,
+    #[serde(default)]
+    close_on_complete: bool,
 }
 
 #[derive(Debug, Deserialize)]
@@ -154,6 +156,8 @@ struct LiveCase {
     /// Shells keyed by the registered Relay sender id.
     shells: HashMap<String, JurorShell>,
     finished: bool,
+    close_on_complete: bool,
+    evidence_count: usize,
 }
 
 pub struct Daemon {
@@ -289,6 +293,8 @@ impl Daemon {
             choices: p.choices,
             shells,
             finished: false,
+            close_on_complete: p.close_on_complete,
+            evidence_count: evidence.len(),
         });
         Ok(json!({ "registry": registry, "evidence": evidence, "phase": phase, "head": head }))
     }
@@ -408,7 +414,22 @@ impl Daemon {
         // Monotonic: a late or reordered tick never moves the clock backward.
         let now = case.clock.now_ms().max(p.now_ms);
         case.clock.set(now);
-        let closed = if case.clerk.tick(&mut case.ledger)? {
+        let window = case.clerk.phase(case.ledger.case_id()).expect("own case");
+        let expected_kind = match window.phase {
+            Phase::Attest => EntryKind::Evidence,
+            Phase::Commit => EntryKind::Commit,
+            Phase::Reveal => EntryKind::Reveal,
+            Phase::Deliberate => EntryKind::Argument,
+        };
+        let accepted: std::collections::BTreeSet<String> = case.ledger.entries().iter().rev()
+            .take_while(|e| e.kind != EntryKind::Phase)
+            .filter(|e| e.kind == expected_kind && e.status == EntryStatus::Accepted)
+            .filter_map(|e| e.msg.get("body")?.get(if expected_kind == EntryKind::Evidence { "id" } else { "juror" })?.as_str().map(str::to_owned))
+            .collect();
+        let needed = if expected_kind == EntryKind::Evidence { case.evidence_count } else { 4 };
+        let complete = case.close_on_complete && !window.closed && needed > 0 && accepted.len() == needed;
+        let did_close = if complete { case.clerk.close_phase(&mut case.ledger)?; true } else { case.clerk.tick(&mut case.ledger)? };
+        let closed = if did_close {
             Some(
                 case.ledger
                     .entries()

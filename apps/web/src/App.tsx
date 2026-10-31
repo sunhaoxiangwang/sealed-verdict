@@ -4,8 +4,11 @@ import Courtroom from "./pages/Courtroom";
 import Results from "./pages/Results";
 import Replay from "./pages/Replay";
 import Certificate from "./pages/Certificate";
+import { useEffect } from "react";
+import { subscribeAML } from "./live/aml";
 
 export default function App() {
+  useEffect(subscribeAML, []);
   return (
     <BrowserRouter>
       <div className="app-shell">

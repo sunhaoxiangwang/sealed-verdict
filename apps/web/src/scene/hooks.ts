@@ -23,6 +23,9 @@ export const VOTE_COLOR: Record<string, Color> = {
   true: new Color("#5ac47c"),
   false: new Color("#e04b3a"),
   uncertain: new Color("#d7a73b"),
+  escalate: new Color("#e04b3a"),
+  close: new Color("#5ac47c"),
+  need_more_info: new Color("#d7a73b"),
 };
 export const BYZ = new Color("#7fcf5a");
 

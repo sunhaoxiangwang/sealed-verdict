@@ -1,0 +1,28 @@
+{
+  "id": "td-bank-cash-network-2024",
+  "title": "TD Bank · nominee-account cash network",
+  "dataKind": "public_enforcement_record",
+  "description": "Real conduct described in the US Department of Justice's October 10, 2024 resolution. These are published aggregate facts, not a transaction-level bank export. No transactions, KYC records, customer replies or human approvals have been invented.",
+  "source": "https://www.justice.gov/archives/opa/pr/td-bank-pleads-guilty-bank-secrecy-act-and-money-laundering-conspiracy-violations-18b",
+  "publishedAt": "2024-10-10",
+  "question": "Does the documented cash-network activity warrant escalation to a human AML officer for suspicious-activity review?",
+  "choices": ["escalate", "close", "need_more_info"],
+  "context": [
+    {
+      "source": "DOJ 2024-10-10, cash network, paragraphs 15–16",
+      "content": "Between January 2018 and February 2021, a money-laundering network processed more than USD 470 million at TD Bank using large cash deposits into nominee accounts."
+    },
+    {
+      "source": "DOJ 2024-10-10, employee inducements, paragraph 16",
+      "content": "The network's operators provided bank employees gift cards worth more than USD 57,000 to keep their transactions being processed."
+    },
+    {
+      "source": "DOJ 2024-10-10, reporting failures, paragraph 16",
+      "content": "Cash deposits exceeded USD 10,000 in suspicious transactions, but employees failed to identify the person conducting the transactions in required reports."
+    },
+    {
+      "source": "Source scope and missing records",
+      "content": "No transaction rows, owner KYC, invoices or customer RFI response are included in this public record. These records are unavailable; do not invent them. This retrospective review cannot file a SAR or supply human approval."
+    }
+  ]
+}

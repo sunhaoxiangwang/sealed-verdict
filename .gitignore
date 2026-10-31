@@ -5,6 +5,7 @@ node_modules
 dist
 # Python (eval, teammate-owned)
 eval/cache/
+eval/.cache/
 __pycache__
 .venv
 # Case outputs (regenerate with `cargo run --bin run_case`)
@@ -18,6 +19,8 @@ apps/actors/out/
 keys/
 # OS
 .DS_Store
+.runtime/
+demo/live/runs/
 # Live-mode runtime state and credentials (WP2): never commit
 .durable-actors/
 .agent-relay/
