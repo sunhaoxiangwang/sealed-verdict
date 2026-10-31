@@ -11,7 +11,7 @@ export type TribunalEvent =
   | { type: "evidence"; msg: Signed<Evidence>; verified: boolean }
   | { type: "commit"; msg: Signed<Commit>; verified: boolean }
   | { type: "reveal"; msg: Signed<Reveal>; verified: boolean }
-  | { type: "argument"; msg: Signed<Argument>; verified: boolean; unattested: boolean }
+  | { type: "argument"; msg: Signed<Argument>; verified: boolean; unattested: boolean; stance?: "true" | "false" | "uncertain" }
   | { type: "verdict"; msg: Signed<VerdictCert>; verified: boolean }
   | { type: "phase"; msg: PhaseChange }
   | { type: "system"; text: string; level: "info" | "warn" | "error" };

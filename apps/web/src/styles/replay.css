@@ -1,0 +1,26 @@
+.rgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 8px; }
+@media (max-width: 800px) { .rgrid { grid-template-columns: minmax(0, 1fr); } }
+.rcol { display: flex; flex-direction: column; gap: 10px; padding: 14px; background: var(--panel); border: 1px solid var(--oak); border-radius: var(--radius); min-width: 0; }
+.rcol-C5 { border-color: var(--brass-2); }
+.rcol h2 { font-family: var(--font-display); font-size: 24px; margin: 0; color: var(--parchment); }
+.rcol p { margin: 4px 0 0; }
+.rchips { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.rchip { --vc: var(--ink-dim); display: grid; grid-template-columns: 10px minmax(0, 1fr) auto; grid-template-areas: "dot name vote" "dot state flip"; column-gap: 8px; align-items: center; padding: 8px 10px; border: 1px solid var(--vc); border-radius: 8px; background: color-mix(in srgb, var(--vc) 12%, transparent); font-family: var(--font-mono); font-size: 11px; transition: border-color 0.3s, background 0.3s; }
+.vote-true { --vc: var(--true); }
+.vote-false { --vc: var(--false); }
+.vote-uncertain { --vc: var(--uncertain); }
+.rchip-dot { grid-area: dot; width: 10px; height: 10px; border-radius: 50%; background: var(--vc); }
+.rchip-name { grid-area: name; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rchip-vote { grid-area: vote; color: var(--vc); text-transform: uppercase; }
+.rchip-state { grid-area: state; color: var(--ink-dim); text-transform: uppercase; font-size: 10px; }
+.rchip-flip { grid-area: flip; color: #1a1205; background: var(--uncertain); border-radius: 4px; padding: 1px 6px; font-size: 10px; text-transform: uppercase; font-weight: 700; animation: flip-pulse 1.2s ease-in-out 3; }
+@keyframes flip-pulse { 50% { box-shadow: 0 0 10px var(--uncertain); } }
+.rfeed { display: flex; flex-direction: column; gap: 8px; min-height: 220px; max-height: 340px; overflow-y: auto; padding: 8px; background: rgba(0, 0, 0, 0.25); border-radius: 8px; }
+.ritem { border-left: 2px solid var(--oak-2); padding-left: 8px; font-size: 13px; line-height: 1.4; overflow-wrap: anywhere; }
+.ritem-verdict { border-left-color: var(--brass); }
+.rname { font-family: var(--font-mono); font-size: 11px; color: var(--brass); margin-right: 6px; }
+.rtext { color: var(--parchment); }
+.rverdict { font-family: var(--font-mono); font-size: 13px; color: var(--parchment); }
+.rbanner { padding: 12px; border-radius: 8px; border: 2px solid; font-family: var(--font-display); font-size: 20px; font-weight: 700; text-align: center; }
+.rbanner-C2 { color: var(--false); border-color: var(--false); background: rgba(224, 75, 58, 0.12); }
+.rbanner-C5 { color: var(--verified); border-color: var(--verified); background: rgba(90, 196, 124, 0.1); }

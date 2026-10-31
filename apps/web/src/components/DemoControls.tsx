@@ -20,9 +20,9 @@ export default function DemoControls() {
           </button>
         ))}
       </div>
-      <button onClick={injectForgedEvidence}>Inject forged evidence</button>
+      <button onClick={() => injectForgedEvidence()}>Inject forged evidence</button>
       <button disabled={!target} onClick={() => target && makeByzantine(target)}>Make juror Byzantine</button>
-      <button onClick={tamperTranscript}>Tamper transcript</button>
+      <button onClick={() => tamperTranscript()}>Tamper transcript</button>
       <span className={`source-badge source-${source}`}>{source === "mock" ? "MOCK" : "LIVE"}</span>
     </div>
   );

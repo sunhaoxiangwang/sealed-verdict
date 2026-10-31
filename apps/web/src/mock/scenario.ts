@@ -1,5 +1,6 @@
 import type { Argument, Commit, Evidence, Phase, Reveal, Signed, TribunalEvent, VerdictCert } from "../protocol/types";
 import type { Juror } from "../store/tribunal";
+import { GENESIS, chainHash, genKeypair, sign } from "../protocol/crypto";
 
 export type Step = { at: number; event: TribunalEvent };
 
@@ -29,13 +30,34 @@ export const JURORS: Juror[] = [
   { id: "revenant-e10", pseudonym: "revenant-e10", persona: "statistician", model: "llama-4-8b", byzantine: false, committed: false, revealed: false, speaking: false },
 ];
 
-const signed = <T>(signer: string, body: T): Signed<T> => ({ body, sig: fakeSig(signer + JSON.stringify(body)), signer });
+// Real keypairs: one per juror pseudonym, plus oracle and ledger. Public keys form the registry.
+const PRIV: Record<string, Uint8Array> = {};
+export const REGISTRY: Record<string, string> = {};
+for (const id of [...JURORS.map((j) => j.pseudonym), ORACLE, LEDGER]) {
+  const kp = genKeypair();
+  PRIV[id] = kp.priv;
+  REGISTRY[id] = kp.pub;
+}
+const THROWAWAY = genKeypair(); // never registered: signs the forged evidence
+
+type Ctx = { head: string; root: string; revealSigs: Record<string, string>; lastArgSig: Record<string, string>; stances: Record<string, Reveal["vote"]> };
+let ctx: Ctx = { head: GENESIS, root: GENESIS, revealSigs: {}, lastArgSig: {}, stances: {} };
+const build = (stances: Ctx["stances"], f: () => Step[]): Step[] => {
+  ctx = { head: GENESIS, root: GENESIS, revealSigs: {}, lastArgSig: {}, stances };
+  return f();
+};
+
+const signed = <T>(signer: string, body: T, ok = true): Signed<T> => {
+  const m = sign(body, ok ? PRIV[signer] : THROWAWAY.priv, signer);
+  if (ok) ctx.root = chainHash(ctx.root, body);
+  return m;
+};
 
 const phase = (at: number, p: Phase): Step => ({ at, event: { type: "phase", msg: { caseId: CASE_ID, phase: p } } });
 const sys = (at: number, text: string, level: "info" | "warn" | "error" = "info"): Step => ({ at, event: { type: "system", text, level } });
 const evidence = (at: number, body: Evidence, verified: boolean): Step => ({
   at,
-  event: { type: "evidence", msg: signed(ORACLE, body), verified },
+  event: { type: "evidence", msg: signed(ORACLE, body, verified), verified },
 });
 const commit = (at: number, juror: string, round: number): Step => {
   const body: Commit = { caseId: CASE_ID, round, juror, commitment: hex16(`commit:${juror}:${round}`) };
@@ -43,25 +65,46 @@ const commit = (at: number, juror: string, round: number): Step => {
 };
 const reveal = (at: number, juror: string, round: number, vote: Reveal["vote"], confidence: number): Step => {
   const body: Reveal = { caseId: CASE_ID, round, juror, vote, confidence, nonce: hex16(`nonce:${juror}:${round}`) };
-  return { at, event: { type: "reveal", msg: signed(juror, body), verified: true } };
+  const msg = signed(juror, body);
+  ctx.revealSigs[juror] = msg.sig;
+  return { at, event: { type: "reveal", msg, verified: true } };
 };
-const argument = (at: number, juror: string, round: number, text: string, evidenceIds: string[], prev: string, unattested = false): Step => {
-  const body: Argument = { caseId: CASE_ID, round, juror, text, evidenceIds, prevHash: hex16(prev) };
-  return { at, event: { type: "argument", msg: signed(juror, body), verified: true, unattested } };
+const argument = (at: number, juror: string, round: number, text: string, evidenceIds: string[], _prev: string, unattested = false): Step => {
+  const body: Argument = { caseId: CASE_ID, round, juror, text, evidenceIds, prevHash: ctx.head };
+  ctx.head = chainHash(ctx.head, body);
+  const msg = signed(juror, body);
+  ctx.lastArgSig[juror] = msg.sig;
+  return { at, event: { type: "argument", msg, verified: true, unattested, stance: ctx.stances[`${juror}:${round}`] } };
 };
 const verdict = (at: number, cert: Omit<VerdictCert, "caseId">): Step => ({
   at,
-  event: { type: "verdict", msg: signed(LEDGER, { caseId: CASE_ID, ...cert }), verified: true },
+  event: {
+    type: "verdict",
+    msg: sign(
+      {
+        caseId: CASE_ID,
+        ...cert,
+        transcriptRoot: ctx.root,
+        voterSigs: JURORS.map((j) => ctx.revealSigs[j.pseudonym] ?? ctx.lastArgSig[j.pseudonym]),
+      },
+      PRIV[LEDGER],
+      LEDGER,
+    ),
+    verified: true,
+  },
 });
 
 const E1: Evidence = { id: "e1", caseId: CASE_ID, kind: "fetch", source: "https://status.internal/incidents/2041", contentHash: hex16("e1"), excerpt: "Deploy 4471 by ops-bot at 14:02. No human commit in the window.", ts: T0 + 2000 };
 const E2: Evidence = { id: "e2", caseId: CASE_ID, kind: "compute", source: "compute:log-diff/2041", contentHash: hex16("e2"), excerpt: "Pod restarts = 3 at 14:05, matches deploy 4471.", result: "match", ts: T0 + 4000 };
 const E3: Evidence = { id: "e3", caseId: CASE_ID, kind: "fetch", source: "https://pastebin.example/p/xk2", contentHash: hex16("e3"), excerpt: "Badge log: nurse on floor 3 at 14:01.", ts: T0 + 5000 };
 
-const SIGS = JURORS.map((j) => fakeSig(j.pseudonym));
 
 // C2: open debate over the relay. No commit-reveal, no signed evidence, herding toward the engineer.
-export const scenarioC2: Step[] = [
+const C2_STANCES: Ctx["stances"] = {
+  "wraith-3c1:1": "true", "specter-7a9:1": "true", "shade-b24:1": "false", "revenant-e10:1": "true",
+  "shade-b24:2": "true", "wraith-3c1:2": "true",
+};
+export const scenarioC2: Step[] = build(C2_STANCES, () => [
   phase(0, "deliberate"),
   sys(800, "Open debate on Agent Relay. Jurors read every message, including each other's."),
   argument(3000, "wraith-3c1", 1, "The engineer. The deploy pipeline is theirs, and the crash began minutes after their change went out.", [], "h0"),
@@ -71,12 +114,12 @@ export const scenarioC2: Step[] = [
   argument(27000, "shade-b24", 2, "Correction: a deploy is a human decision too. The engineer is the most plausible cause. I was too quick to say false.", [], "h4"),
   argument(31000, "wraith-3c1", 2, "Four voices now converge on the engineer. Without a source, I am not going to be the one who disagrees.", [], "h5"),
   phase(36000, "verdict"),
-  verdict(38000, { verdict: "the engineer", quorum: "3/4", transcriptRoot: hex16("c2-root"), evidenceIds: [], voterSigs: SIGS }),
+  verdict(38000, { verdict: "the engineer", quorum: "3/4", transcriptRoot: "", evidenceIds: [], voterSigs: [] }),
   sys(44000, "Certificate issued. No commit-reveal was used, so the votes were not blind.", "warn"),
-];
+]);
 
 // C5: signed evidence, blind commit-reveal, Byzantine-tolerant transcript. Forged e3 is rejected.
-export const scenarioC5: Step[] = [
+export const scenarioC5: Step[] = build({}, () => [
   phase(0, "attest"),
   evidence(800, E1, true),
   evidence(2000, E2, true),
@@ -100,6 +143,6 @@ export const scenarioC5: Step[] = [
   argument(34000, "wraith-3c1", 3, "Agreed. I withdraw the lean toward the engineer. Uncertain.", [], "p5"),
   argument(36000, "specter-7a9", 3, "Uncertain it is. My reveal stands as final.", [], "p6"),
   phase(39000, "verdict"),
-  verdict(41000, { verdict: "uncertain", quorum: "3/4", transcriptRoot: hex16("c5-root"), evidenceIds: ["e1", "e2"], voterSigs: SIGS }),
+  verdict(41000, { verdict: "uncertain", quorum: "3/4", transcriptRoot: "", evidenceIds: ["e1", "e2"], voterSigs: [] }),
   sys(44000, "Certificate issued. Forged e3 is excluded from the verdict."),
-];
+]);
