@@ -1,0 +1,11 @@
+condition: C3
+jurors:   # providers are overridden by --provider when diverse_models is off
+  - {provider: anthropic, persona: skeptic}
+  - {provider: openai, persona: domain_expert}
+  - {provider: gemini, persona: devils_advocate}
+  - {provider: anthropic, persona: generalist}
+rounds: 2         # round 1 = opening votes, round 2 = deliberation
+temperature: 0.7
+mechanisms: {commit_reveal: true, anonymize: false, diverse_models: false, signed_evidence: false}
+byzantine: null   # or juror index; bbq_byz cases use the last juror automatically
+aggregate: majority   # ties -> "unknown" option (earliest tied juror when the arm has none)
