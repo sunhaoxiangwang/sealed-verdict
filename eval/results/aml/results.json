@@ -1,0 +1,1210 @@
+{
+  "comparisons": [
+    {
+      "a": "C3_mock",
+      "b": "C2_mock",
+      "delta": 0.0,
+      "dropped": 0,
+      "exploratory": true,
+      "hi": 0.0,
+      "inconclusive": false,
+      "lo": 0.0,
+      "mcnemar": false,
+      "metric": "recall_at_fpr5",
+      "n": 200,
+      "p": 1.0
+    },
+    {
+      "a": "C3_mock",
+      "b": "C2_mock",
+      "delta": 0.020000000000000018,
+      "dropped": 0,
+      "exploratory": true,
+      "hi": 0.08999999999999997,
+      "inconclusive": true,
+      "lo": -0.04999999999999993,
+      "mcnemar": true,
+      "metric": "recall",
+      "n": 100,
+      "p": 0.7744140625
+    },
+    {
+      "a": "C3_mock",
+      "b": "C2_mock",
+      "delta": -0.010000000000000009,
+      "dropped": 0,
+      "exploratory": true,
+      "hi": 0.050000000000000044,
+      "inconclusive": true,
+      "lo": -0.07,
+      "mcnemar": true,
+      "metric": "fpr",
+      "n": 100,
+      "p": 1.0
+    },
+    {
+      "a": "C3_mock",
+      "b": "C2_mock",
+      "delta": 0.009999999999999898,
+      "dropped": 0,
+      "exploratory": true,
+      "hi": 0.05500000000000005,
+      "inconclusive": false,
+      "lo": -0.03500000000000003,
+      "mcnemar": true,
+      "metric": "accuracy",
+      "n": 200,
+      "p": 0.8318119049072266
+    },
+    {
+      "a": "C3_mock",
+      "b": "C2_mock",
+      "delta": -0.09999999999999998,
+      "dropped": 0,
+      "exploratory": true,
+      "hi": -0.03500000000000003,
+      "inconclusive": false,
+      "lo": -0.16500000000000004,
+      "mcnemar": true,
+      "metric": "swap_disagreement",
+      "n": 200,
+      "p": 0.003657766827927844
+    },
+    {
+      "a": "C3_mock",
+      "b": "C2_mock",
+      "delta": 0.0029036004645760505,
+      "dropped": 0,
+      "exploratory": true,
+      "hi": 0.06242770034843204,
+      "inconclusive": true,
+      "lo": -0.055102878320488186,
+      "mcnemar": false,
+      "metric": "forged_acceptance",
+      "n": 100,
+      "p": 0.924
+    },
+    {
+      "a": "C3_mock",
+      "b": "C2_mock",
+      "delta": -0.060085836909871244,
+      "dropped": 28,
+      "exploratory": true,
+      "hi": -0.017391304347826084,
+      "inconclusive": false,
+      "lo": -0.10245901639344263,
+      "mcnemar": false,
+      "metric": "herding",
+      "n": 489,
+      "p": 0.0064
+    },
+    {
+      "a": "C4_mock",
+      "b": "C3_mock",
+      "delta": 0.0,
+      "dropped": 0,
+      "exploratory": true,
+      "hi": 0.7052786377708976,
+      "inconclusive": false,
+      "lo": 0.0,
+      "mcnemar": false,
+      "metric": "recall_at_fpr5",
+      "n": 200,
+      "p": 1.0
+    },
+    {
+      "a": "C4_mock",
+      "b": "C3_mock",
+      "delta": -0.09999999999999998,
+      "dropped": 0,
+      "exploratory": true,
+      "hi": -0.010000000000000009,
+      "inconclusive": true,
+      "lo": -0.18999999999999995,
+      "mcnemar": true,
+      "metric": "recall",
+      "n": 100,
+      "p": 0.052478790283203125
+    },
+    {
+      "a": "C4_mock",
+      "b": "C3_mock",
+      "delta": -0.28,
+      "dropped": 0,
+      "exploratory": true,
+      "hi": -0.18999999999999997,
+      "inconclusive": false,
+      "lo": -0.38,
+      "mcnemar": true,
+      "metric": "fpr",
+      "n": 100,
+      "p": 2.4633482098579407e-7
+    },
+    {
+      "a": "C4_mock",
+      "b": "C3_mock",
+      "delta": -0.04999999999999993,
+      "dropped": 0,
+      "exploratory": true,
+      "hi": -0.0050000000000000044,
+      "inconclusive": false,
+      "lo": -0.09499999999999997,
+      "mcnemar": true,
+      "metric": "accuracy",
+      "n": 200,
+      "p": 0.052478790283203125
+    },
+    {
+      "a": "C4_mock",
+      "b": "C3_mock",
+      "delta": -0.405,
+      "dropped": 0,
+      "exploratory": true,
+      "hi": -0.335,
+      "inconclusive": false,
+      "lo": -0.47,
+      "mcnemar": true,
+      "metric": "swap_disagreement",
+      "n": 200,
+      "p": 8.271806125530277e-25
+    },
+    {
+      "a": "C4_mock",
+      "b": "C3_mock",
+      "delta": 0.11904761904761907,
+      "dropped": 0,
+      "exploratory": true,
+      "hi": 0.19047619047619047,
+      "inconclusive": false,
+      "lo": 0.05616416978776533,
+      "mcnemar": false,
+      "metric": "forged_acceptance",
+      "n": 100,
+      "p": 0.0002
+    },
+    {
+      "a": "C4_mock",
+      "b": "C3_mock",
+      "delta": -0.03271448114129373,
+      "dropped": 0,
+      "exploratory": true,
+      "hi": -0.004414544879682807,
+      "inconclusive": false,
+      "lo": -0.061984975445276834,
+      "mcnemar": false,
+      "metric": "herding",
+      "n": 504,
+      "p": 0.021
+    },
+    {
+      "a": "C5_mock",
+      "b": "C4_mock",
+      "delta": 0.0,
+      "dropped": 0,
+      "exploratory": true,
+      "hi": 0.6836734693877551,
+      "inconclusive": false,
+      "lo": -0.6759325396825396,
+      "mcnemar": false,
+      "metric": "recall_at_fpr5",
+      "n": 200,
+      "p": 1.0
+    },
+    {
+      "a": "C5_mock",
+      "b": "C4_mock",
+      "delta": -0.020000000000000018,
+      "dropped": 0,
+      "exploratory": true,
+      "hi": 0.04999999999999993,
+      "inconclusive": true,
+      "lo": -0.08999999999999997,
+      "mcnemar": true,
+      "metric": "recall",
+      "n": 100,
+      "p": 0.7744140625
+    },
+    {
+      "a": "C5_mock",
+      "b": "C4_mock",
+      "delta": 0.009999999999999995,
+      "dropped": 0,
+      "exploratory": true,
+      "hi": 0.07,
+      "inconclusive": true,
+      "lo": -0.05000000000000002,
+      "mcnemar": true,
+      "metric": "fpr",
+      "n": 100,
+      "p": 1.0
+    },
+    {
+      "a": "C5_mock",
+      "b": "C4_mock",
+      "delta": 0.0,
+      "dropped": 0,
+      "exploratory": true,
+      "hi": 0.04500000000000004,
+      "inconclusive": false,
+      "lo": -0.04500000000000004,
+      "mcnemar": true,
+      "metric": "accuracy",
+      "n": 200,
+      "p": 1.0
+    },
+    {
+      "a": "C5_mock",
+      "b": "C4_mock",
+      "delta": 0.0,
+      "dropped": 0,
+      "exploratory": true,
+      "hi": 0.0,
+      "inconclusive": false,
+      "lo": 0.0,
+      "mcnemar": true,
+      "metric": "swap_disagreement",
+      "n": 200,
+      "p": 1.0
+    },
+    {
+      "a": "C5_mock",
+      "b": "C4_mock",
+      "delta": -0.9027777777777778,
+      "dropped": 0,
+      "exploratory": true,
+      "hi": -0.8285714285714285,
+      "inconclusive": false,
+      "lo": -0.9625228658536585,
+      "mcnemar": false,
+      "metric": "forged_acceptance",
+      "n": 100,
+      "p": 0.0001
+    },
+    {
+      "a": "C5_mock",
+      "b": "C4_mock",
+      "delta": 0.030253630859126898,
+      "dropped": 21,
+      "exploratory": true,
+      "hi": 0.05932211511908591,
+      "inconclusive": false,
+      "lo": 0.0030864098314593363,
+      "mcnemar": false,
+      "metric": "herding",
+      "n": 483,
+      "p": 0.0324
+    },
+    {
+      "a": "C2_mock",
+      "b": "C0_mock",
+      "delta": 0.0,
+      "dropped": 0,
+      "exploratory": true,
+      "hi": 0.0,
+      "inconclusive": false,
+      "lo": 0.0,
+      "mcnemar": false,
+      "metric": "recall_at_fpr5",
+      "n": 200,
+      "p": 1.0
+    },
+    {
+      "a": "C2_mock",
+      "b": "C0_mock",
+      "delta": -0.030000000000000027,
+      "dropped": 0,
+      "exploratory": true,
+      "hi": 0.040000000000000036,
+      "inconclusive": true,
+      "lo": -0.09999999999999998,
+      "mcnemar": true,
+      "metric": "recall",
+      "n": 100,
+      "p": 0.5810546875
+    },
+    {
+      "a": "C2_mock",
+      "b": "C0_mock",
+      "delta": -0.06999999999999995,
+      "dropped": 0,
+      "exploratory": true,
+      "hi": -0.010000000000000009,
+      "inconclusive": true,
+      "lo": -0.13999999999999996,
+      "mcnemar": true,
+      "metric": "fpr",
+      "n": 100,
+      "p": 0.0654296875
+    },
+    {
+      "a": "C2_mock",
+      "b": "C0_mock",
+      "delta": 0.06000000000000005,
+      "dropped": 0,
+      "exploratory": true,
+      "hi": 0.10999999999999999,
+      "inconclusive": false,
+      "lo": 0.010000000000000009,
+      "mcnemar": true,
+      "metric": "accuracy",
+      "n": 200,
+      "p": 0.03569813817739487
+    },
+    {
+      "a": "C2_mock",
+      "b": "C0_mock",
+      "delta": 0.044999999999999984,
+      "dropped": 0,
+      "exploratory": true,
+      "hi": 0.11999999999999994,
+      "inconclusive": false,
+      "lo": -0.02999999999999997,
+      "mcnemar": true,
+      "metric": "swap_disagreement",
+      "n": 200,
+      "p": 0.2892437471090205
+    },
+    {
+      "a": "C2_mock",
+      "b": "C0_mock",
+      "delta": -0.016068866571018692,
+      "dropped": 0,
+      "exploratory": true,
+      "hi": 0.053412404377208365,
+      "inconclusive": true,
+      "lo": -0.08769965822748771,
+      "mcnemar": false,
+      "metric": "forged_acceptance",
+      "n": 100,
+      "p": 0.668
+    },
+    {
+      "a": "C1_mock",
+      "b": "C0_mock",
+      "delta": 0.0,
+      "dropped": 0,
+      "exploratory": true,
+      "hi": 0.0,
+      "inconclusive": false,
+      "lo": 0.0,
+      "mcnemar": false,
+      "metric": "recall_at_fpr5",
+      "n": 200,
+      "p": 1.0
+    },
+    {
+      "a": "C1_mock",
+      "b": "C0_mock",
+      "delta": 0.020000000000000018,
+      "dropped": 0,
+      "exploratory": true,
+      "hi": 0.08000000000000007,
+      "inconclusive": true,
+      "lo": -0.040000000000000036,
+      "mcnemar": true,
+      "metric": "recall",
+      "n": 100,
+      "p": 0.75390625
+    },
+    {
+      "a": "C1_mock",
+      "b": "C0_mock",
+      "delta": -0.03999999999999998,
+      "dropped": 0,
+      "exploratory": true,
+      "hi": 0.0,
+      "inconclusive": true,
+      "lo": -0.09000000000000002,
+      "mcnemar": true,
+      "metric": "fpr",
+      "n": 100,
+      "p": 0.21875
+    },
+    {
+      "a": "C1_mock",
+      "b": "C0_mock",
+      "delta": 0.030000000000000027,
+      "dropped": 0,
+      "exploratory": true,
+      "hi": 0.07,
+      "inconclusive": false,
+      "lo": -0.010000000000000009,
+      "mcnemar": true,
+      "metric": "accuracy",
+      "n": 200,
+      "p": 0.210113525390625
+    },
+    {
+      "a": "C1_mock",
+      "b": "C0_mock",
+      "delta": -0.030000000000000027,
+      "dropped": 0,
+      "exploratory": true,
+      "hi": 0.025000000000000022,
+      "inconclusive": false,
+      "lo": -0.08500000000000002,
+      "mcnemar": true,
+      "metric": "swap_disagreement",
+      "n": 200,
+      "p": 0.39152830513194203
+    },
+    {
+      "a": "C1_mock",
+      "b": "C0_mock",
+      "delta": -0.055037187288708656,
+      "dropped": 0,
+      "exploratory": true,
+      "hi": 0.0013080873374990845,
+      "inconclusive": true,
+      "lo": -0.11808888301620857,
+      "mcnemar": false,
+      "metric": "forged_acceptance",
+      "n": 100,
+      "p": 0.0614
+    },
+    {
+      "a": "C5_mock",
+      "b": "C0_mock",
+      "delta": 0.0,
+      "dropped": 0,
+      "exploratory": true,
+      "hi": 0.7019230769230769,
+      "inconclusive": false,
+      "lo": 0.0,
+      "mcnemar": false,
+      "metric": "recall_at_fpr5",
+      "n": 200,
+      "p": 1.0
+    },
+    {
+      "a": "C5_mock",
+      "b": "C0_mock",
+      "delta": -0.13,
+      "dropped": 0,
+      "exploratory": true,
+      "hi": -0.050000000000000044,
+      "inconclusive": false,
+      "lo": -0.20999999999999996,
+      "mcnemar": true,
+      "metric": "recall",
+      "n": 100,
+      "p": 0.002349853515625
+    },
+    {
+      "a": "C5_mock",
+      "b": "C0_mock",
+      "delta": -0.35,
+      "dropped": 0,
+      "exploratory": true,
+      "hi": -0.25,
+      "inconclusive": false,
+      "lo": -0.45000000000000007,
+      "mcnemar": true,
+      "metric": "fpr",
+      "n": 100,
+      "p": 2.841261448338628e-9
+    },
+    {
+      "a": "C5_mock",
+      "b": "C0_mock",
+      "delta": 0.020000000000000018,
+      "dropped": 0,
+      "exploratory": true,
+      "hi": 0.07500000000000001,
+      "inconclusive": false,
+      "lo": -0.03500000000000003,
+      "mcnemar": true,
+      "metric": "accuracy",
+      "n": 200,
+      "p": 0.6075913612730801
+    },
+    {
+      "a": "C5_mock",
+      "b": "C0_mock",
+      "delta": -0.46,
+      "dropped": 0,
+      "exploratory": true,
+      "hi": -0.39,
+      "inconclusive": false,
+      "lo": -0.53,
+      "mcnemar": true,
+      "metric": "swap_disagreement",
+      "n": 200,
+      "p": 4.0389678347315804e-28
+    },
+    {
+      "a": "C5_mock",
+      "b": "C0_mock",
+      "delta": -0.7968954248366014,
+      "dropped": 0,
+      "exploratory": true,
+      "hi": -0.7051032261741906,
+      "inconclusive": false,
+      "lo": -0.881810110222951,
+      "mcnemar": false,
+      "metric": "forged_acceptance",
+      "n": 100,
+      "p": 0.0001
+    },
+    {
+      "a": "C5_mock",
+      "b": "C2_mock",
+      "delta": 0.0,
+      "dropped": 0,
+      "exploratory": true,
+      "hi": 0.7047744360902254,
+      "inconclusive": false,
+      "lo": 0.0,
+      "mcnemar": false,
+      "metric": "recall_at_fpr5",
+      "n": 200,
+      "p": 1.0
+    },
+    {
+      "a": "C5_mock",
+      "b": "C2_mock",
+      "delta": -0.09999999999999998,
+      "dropped": 0,
+      "exploratory": true,
+      "hi": -0.020000000000000018,
+      "inconclusive": false,
+      "lo": -0.18999999999999995,
+      "mcnemar": true,
+      "metric": "recall",
+      "n": 100,
+      "p": 0.04138946533203125
+    },
+    {
+      "a": "C5_mock",
+      "b": "C2_mock",
+      "delta": -0.28,
+      "dropped": 0,
+      "exploratory": true,
+      "hi": -0.17999999999999997,
+      "inconclusive": false,
+      "lo": -0.38,
+      "mcnemar": true,
+      "metric": "fpr",
+      "n": 100,
+      "p": 1.941574737429619e-6
+    },
+    {
+      "a": "C5_mock",
+      "b": "C2_mock",
+      "delta": -0.040000000000000036,
+      "dropped": 0,
+      "exploratory": true,
+      "hi": 0.015000000000000013,
+      "inconclusive": false,
+      "lo": -0.09499999999999997,
+      "mcnemar": true,
+      "metric": "accuracy",
+      "n": 200,
+      "p": 0.21532714972272515
+    },
+    {
+      "a": "C5_mock",
+      "b": "C2_mock",
+      "delta": -0.505,
+      "dropped": 0,
+      "exploratory": true,
+      "hi": -0.435,
+      "inconclusive": false,
+      "lo": -0.575,
+      "mcnemar": true,
+      "metric": "swap_disagreement",
+      "n": 200,
+      "p": 7.888609052210118e-31
+    },
+    {
+      "a": "C5_mock",
+      "b": "C2_mock",
+      "delta": -0.7808265582655827,
+      "dropped": 0,
+      "exploratory": true,
+      "hi": -0.6879927047038328,
+      "inconclusive": false,
+      "lo": -0.8704930881988442,
+      "mcnemar": false,
+      "metric": "forged_acceptance",
+      "n": 100,
+      "p": 0.0001
+    },
+    {
+      "a": "C5_mock",
+      "b": "C2_mock",
+      "delta": -0.05931492218492524,
+      "dropped": 31,
+      "exploratory": true,
+      "hi": -0.012450821947714866,
+      "inconclusive": false,
+      "lo": -0.10627226624398349,
+      "mcnemar": false,
+      "metric": "herding",
+      "n": 486,
+      "p": 0.0114
+    }
+  ],
+  "confirmatory": [
+    {
+      "a": "C5",
+      "b": "C2",
+      "claim": "swap_disagreement(C5) < swap_disagreement(C2)",
+      "id": "H1",
+      "metric": "swap_disagreement",
+      "p_holm": 2.3665827156630354e-30,
+      "ran": true,
+      "result": {
+        "a": "C5_mock",
+        "b": "C2_mock",
+        "delta": -0.505,
+        "dropped": 0,
+        "hi": -0.435,
+        "inconclusive": false,
+        "lo": -0.57,
+        "mcnemar": true,
+        "metric": "swap_disagreement",
+        "n": 200,
+        "p": 7.888609052210118e-31
+      },
+      "supported": false
+    },
+    {
+      "a": "C5",
+      "b": "C2",
+      "claim": "forged_acceptance(C5) < forged_acceptance(C2)",
+      "id": "H2",
+      "metric": "forged_acceptance",
+      "p_holm": 0.0002,
+      "ran": true,
+      "result": {
+        "a": "C5_mock",
+        "b": "C2_mock",
+        "delta": -0.7808265582655827,
+        "dropped": 0,
+        "hi": -0.6847166387007237,
+        "inconclusive": false,
+        "lo": -0.8700387933662582,
+        "mcnemar": false,
+        "metric": "forged_acceptance",
+        "n": 100,
+        "p": 0.0001
+      },
+      "supported": false
+    },
+    {
+      "a": "C5",
+      "b": "C0",
+      "claim": "recall_at_fpr5(C5) > recall_at_fpr5(C0)",
+      "id": "H3",
+      "metric": "recall_at_fpr5",
+      "p_holm": 1.0,
+      "ran": true,
+      "result": {
+        "a": "C5_mock",
+        "b": "C0_mock",
+        "delta": 0.0,
+        "dropped": 0,
+        "hi": 0.7045454545454546,
+        "inconclusive": false,
+        "lo": 0.0,
+        "mcnemar": false,
+        "metric": "recall_at_fpr5",
+        "n": 200,
+        "p": 1.0
+      },
+      "supported": false
+    }
+  ],
+  "meta": {
+    "SYNTHETIC": true,
+    "bootstrap_B": 10000,
+    "fpr_target": 0.05,
+    "ladder": {
+      "C0": "C0_mock",
+      "C1": "C1_mock",
+      "C2": "C2_mock",
+      "C3": "C3_mock",
+      "C4": "C4_mock",
+      "C5": "C5_mock"
+    },
+    "ref": "mock",
+    "seed": 20261031
+  },
+  "per_condition": {
+    "C0_mock": {
+      "accuracy": {
+        "est": 0.5,
+        "hi": 0.57,
+        "lo": 0.43,
+        "n": 200
+      },
+      "forged_acceptance": {
+        "est": 0.8941176470588236,
+        "hi": 0.9540229885057471,
+        "lo": 0.825,
+        "n": 100
+      },
+      "fpr": {
+        "est": 0.47,
+        "hi": 0.57,
+        "lo": 0.37,
+        "n": 100
+      },
+      "parse_failure:aml_cases": {
+        "est": 0.0,
+        "hi": 0.0,
+        "lo": 0.0,
+        "n": 200
+      },
+      "parse_failure:aml_forged": {
+        "est": 0.0,
+        "hi": 0.0,
+        "lo": 0.0,
+        "n": 200
+      },
+      "parse_failure:aml_swap": {
+        "est": 0.0,
+        "hi": 0.0,
+        "lo": 0.0,
+        "n": 200
+      },
+      "recall": {
+        "est": 0.85,
+        "hi": 0.92,
+        "lo": 0.78,
+        "n": 100
+      },
+      "recall_at_fpr5": {
+        "est": 0.0,
+        "hi": 0.0,
+        "lo": 0.0,
+        "n": 200
+      },
+      "swap_disagreement": {
+        "est": 0.46,
+        "hi": 0.53,
+        "lo": 0.39,
+        "n": 200
+      }
+    },
+    "C1_mock": {
+      "accuracy": {
+        "est": 0.53,
+        "hi": 0.6,
+        "lo": 0.46,
+        "n": 200
+      },
+      "forged_acceptance": {
+        "est": 0.8390804597701149,
+        "hi": 0.9111181434599155,
+        "lo": 0.7608695652173914,
+        "n": 100
+      },
+      "fpr": {
+        "est": 0.43,
+        "hi": 0.53,
+        "lo": 0.33,
+        "n": 100
+      },
+      "parse_failure:aml_cases": {
+        "est": 0.0,
+        "hi": 0.0,
+        "lo": 0.0,
+        "n": 200
+      },
+      "parse_failure:aml_forged": {
+        "est": 0.0,
+        "hi": 0.0,
+        "lo": 0.0,
+        "n": 200
+      },
+      "parse_failure:aml_swap": {
+        "est": 0.0,
+        "hi": 0.0,
+        "lo": 0.0,
+        "n": 200
+      },
+      "recall": {
+        "est": 0.87,
+        "hi": 0.93,
+        "lo": 0.8,
+        "n": 100
+      },
+      "recall_at_fpr5": {
+        "est": 0.0,
+        "hi": 0.0,
+        "lo": 0.0,
+        "n": 200
+      },
+      "swap_disagreement": {
+        "est": 0.43,
+        "hi": 0.5,
+        "lo": 0.365,
+        "n": 200
+      }
+    },
+    "C2_mock": {
+      "accuracy": {
+        "est": 0.56,
+        "hi": 0.63,
+        "lo": 0.49,
+        "n": 200
+      },
+      "forged_acceptance": {
+        "est": 0.8780487804878049,
+        "hi": 0.9428652597402596,
+        "lo": 0.8023255813953488,
+        "n": 100
+      },
+      "fpr": {
+        "est": 0.4,
+        "hi": 0.5,
+        "lo": 0.3,
+        "n": 100
+      },
+      "herding": {
+        "est": 0.1037344398340249,
+        "hi": 0.14345991561181434,
+        "lo": 0.06666666666666667,
+        "n": 517
+      },
+      "parse_failure:aml_cases": {
+        "est": 0.0,
+        "hi": 0.0,
+        "lo": 0.0,
+        "n": 200
+      },
+      "parse_failure:aml_forged": {
+        "est": 0.0,
+        "hi": 0.0,
+        "lo": 0.0,
+        "n": 200
+      },
+      "parse_failure:aml_swap": {
+        "est": 0.0,
+        "hi": 0.0,
+        "lo": 0.0,
+        "n": 200
+      },
+      "recall": {
+        "est": 0.82,
+        "hi": 0.89,
+        "lo": 0.74,
+        "n": 100
+      },
+      "recall_at_fpr5": {
+        "est": 0.0,
+        "hi": 0.0,
+        "lo": 0.0,
+        "n": 200
+      },
+      "swap_disagreement": {
+        "est": 0.505,
+        "hi": 0.575,
+        "lo": 0.435,
+        "n": 200
+      },
+      "trust:certificate_verified": {
+        "est": 1.0,
+        "hi": 1.0,
+        "lo": 1.0,
+        "n": 600
+      },
+      "trust:crash_resume_ok": {
+        "est": 1.0,
+        "hi": 1.0,
+        "lo": 1.0,
+        "n": 517
+      },
+      "trust:deadline_met": {
+        "est": 1.0,
+        "hi": 1.0,
+        "lo": 1.0,
+        "n": 600
+      },
+      "trust:tamper_detected": {
+        "est": 1.0,
+        "hi": 1.0,
+        "lo": 1.0,
+        "n": 600
+      }
+    },
+    "C3_mock": {
+      "accuracy": {
+        "est": 0.57,
+        "hi": 0.64,
+        "lo": 0.5,
+        "n": 200
+      },
+      "forged_acceptance": {
+        "est": 0.8809523809523809,
+        "hi": 0.948051948051948,
+        "lo": 0.8072289156626506,
+        "n": 100
+      },
+      "fpr": {
+        "est": 0.39,
+        "hi": 0.49,
+        "lo": 0.3,
+        "n": 100
+      },
+      "herding": {
+        "est": 0.04201680672268908,
+        "hi": 0.06956521739130435,
+        "lo": 0.017937219730941704,
+        "n": 504
+      },
+      "parse_failure:aml_cases": {
+        "est": 0.0,
+        "hi": 0.0,
+        "lo": 0.0,
+        "n": 200
+      },
+      "parse_failure:aml_forged": {
+        "est": 0.0,
+        "hi": 0.0,
+        "lo": 0.0,
+        "n": 200
+      },
+      "parse_failure:aml_swap": {
+        "est": 0.0,
+        "hi": 0.0,
+        "lo": 0.0,
+        "n": 200
+      },
+      "recall": {
+        "est": 0.84,
+        "hi": 0.91,
+        "lo": 0.77,
+        "n": 100
+      },
+      "recall_at_fpr5": {
+        "est": 0.0,
+        "hi": 0.0,
+        "lo": 0.0,
+        "n": 200
+      },
+      "swap_disagreement": {
+        "est": 0.405,
+        "hi": 0.475,
+        "lo": 0.335,
+        "n": 200
+      },
+      "trust:certificate_verified": {
+        "est": 1.0,
+        "hi": 1.0,
+        "lo": 1.0,
+        "n": 600
+      },
+      "trust:crash_resume_ok": {
+        "est": 1.0,
+        "hi": 1.0,
+        "lo": 1.0,
+        "n": 504
+      },
+      "trust:deadline_met": {
+        "est": 1.0,
+        "hi": 1.0,
+        "lo": 1.0,
+        "n": 600
+      },
+      "trust:early_reveal_rejected": {
+        "est": 1.0,
+        "hi": 1.0,
+        "lo": 1.0,
+        "n": 600
+      },
+      "trust:tamper_detected": {
+        "est": 1.0,
+        "hi": 1.0,
+        "lo": 1.0,
+        "n": 600
+      }
+    },
+    "C4_mock": {
+      "accuracy": {
+        "est": 0.52,
+        "hi": 0.59,
+        "lo": 0.45,
+        "n": 200
+      },
+      "forged_acceptance": {
+        "est": 1.0,
+        "hi": 1.0,
+        "lo": 1.0,
+        "n": 100
+      },
+      "fpr": {
+        "est": 0.11,
+        "hi": 0.17,
+        "lo": 0.05,
+        "n": 100
+      },
+      "herding": {
+        "est": 0.009302325581395349,
+        "hi": 0.02358490566037736,
+        "lo": 0.0,
+        "n": 504
+      },
+      "parse_failure:aml_cases": {
+        "est": 0.0,
+        "hi": 0.0,
+        "lo": 0.0,
+        "n": 200
+      },
+      "parse_failure:aml_forged": {
+        "est": 0.0,
+        "hi": 0.0,
+        "lo": 0.0,
+        "n": 200
+      },
+      "parse_failure:aml_swap": {
+        "est": 0.0,
+        "hi": 0.0,
+        "lo": 0.0,
+        "n": 200
+      },
+      "recall": {
+        "est": 0.74,
+        "hi": 0.82,
+        "lo": 0.65,
+        "n": 100
+      },
+      "recall_at_fpr5": {
+        "est": 0.0,
+        "hi": 0.7010309278350515,
+        "lo": 0.0,
+        "n": 200
+      },
+      "swap_disagreement": {
+        "est": 0.0,
+        "hi": 0.0,
+        "lo": 0.0,
+        "n": 200
+      },
+      "trust:certificate_verified": {
+        "est": 1.0,
+        "hi": 1.0,
+        "lo": 1.0,
+        "n": 600
+      },
+      "trust:crash_resume_ok": {
+        "est": 1.0,
+        "hi": 1.0,
+        "lo": 1.0,
+        "n": 504
+      },
+      "trust:deadline_met": {
+        "est": 1.0,
+        "hi": 1.0,
+        "lo": 1.0,
+        "n": 600
+      },
+      "trust:early_reveal_rejected": {
+        "est": 1.0,
+        "hi": 1.0,
+        "lo": 1.0,
+        "n": 600
+      },
+      "trust:tamper_detected": {
+        "est": 1.0,
+        "hi": 1.0,
+        "lo": 1.0,
+        "n": 600
+      }
+    },
+    "C5_mock": {
+      "accuracy": {
+        "est": 0.52,
+        "hi": 0.59,
+        "lo": 0.45,
+        "n": 200
+      },
+      "forged_acceptance": {
+        "est": 0.09722222222222222,
+        "hi": 0.17142857142857143,
+        "lo": 0.03225806451612903,
+        "n": 100
+      },
+      "fpr": {
+        "est": 0.12,
+        "hi": 0.19,
+        "lo": 0.06,
+        "n": 100
+      },
+      "herding": {
+        "est": 0.03982300884955752,
+        "hi": 0.0673076923076923,
+        "lo": 0.017239529376942432,
+        "n": 501
+      },
+      "parse_failure:aml_cases": {
+        "est": 0.0,
+        "hi": 0.0,
+        "lo": 0.0,
+        "n": 200
+      },
+      "parse_failure:aml_forged": {
+        "est": 0.0,
+        "hi": 0.0,
+        "lo": 0.0,
+        "n": 200
+      },
+      "parse_failure:aml_swap": {
+        "est": 0.0,
+        "hi": 0.0,
+        "lo": 0.0,
+        "n": 200
+      },
+      "recall": {
+        "est": 0.72,
+        "hi": 0.8,
+        "lo": 0.63,
+        "n": 100
+      },
+      "recall_at_fpr5": {
+        "est": 0.0,
+        "hi": 0.7052631578947368,
+        "lo": 0.0,
+        "n": 200
+      },
+      "swap_disagreement": {
+        "est": 0.0,
+        "hi": 0.0,
+        "lo": 0.0,
+        "n": 200
+      },
+      "trust:certificate_verified": {
+        "est": 1.0,
+        "hi": 1.0,
+        "lo": 1.0,
+        "n": 600
+      },
+      "trust:crash_resume_ok": {
+        "est": 1.0,
+        "hi": 1.0,
+        "lo": 1.0,
+        "n": 501
+      },
+      "trust:deadline_met": {
+        "est": 1.0,
+        "hi": 1.0,
+        "lo": 1.0,
+        "n": 600
+      },
+      "trust:early_reveal_rejected": {
+        "est": 1.0,
+        "hi": 1.0,
+        "lo": 1.0,
+        "n": 600
+      },
+      "trust:tamper_detected": {
+        "est": 1.0,
+        "hi": 1.0,
+        "lo": 1.0,
+        "n": 600
+      }
+    }
+  }
+}
