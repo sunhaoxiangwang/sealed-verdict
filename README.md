@@ -1,21 +1,56 @@
 # Sealed Verdict
 
-LLM jurors deliberate under a commit-reveal protocol, and every verdict ships
-with a certificate that anyone can verify offline. The certificate carries the
-static case registry (who was allowed to speak), the signed round-1 votes, and
-the root of a hash chain over the full transcript. A verifier replays that
-transcript and recomputes the verdict itself; it never trusts what the Clerk
-or Ledger said happened.
+Multi-agent debate makes LLM bias worse: jurors read each other and herd. Sealed
+Verdict runs LLM jurors as a tribunal under a commit-reveal protocol, carries
+every message over Agent Relay, keeps each case's state in a Terse durable
+actor, and ships every verdict with a certificate that anyone can verify
+offline, in Rust or in the browser through the same WebAssembly verifier.
 
-The experiment compares four conditions. C2 has no juror authentication: a
-ballot's juror identity is whatever the ballot claims. C3 to C5 require valid
-Ed25519 signatures from registered jurors and the Oracle, so forged input is
-dropped or tagged UNATTESTED. Clerk and Ledger signatures are mandatory in
-every condition.
+## How it maps to the judging criteria
 
-This is a hackathon prototype. The protocol, actors, and verifier are Rust;
-the verifier is also compiled to WebAssembly so the Node and browser code call
-the same implementation.
+**Real-time AI and the Terse and Agent Relay tracks.** Every protocol message
+of a live case is an Agent Relay message: Oracle evidence, sealed commitments,
+reveals, arguments, Clerk phase markers, and the final certificate each travel
+on a per-case channel (`sv-<caseId>-*`) in real time, and jurors submit their
+ballots as private Relay DMs to the Clerk agent. Each case is a Terse durable
+actor that stores the registry, the open phase and its deadline, every ledger
+entry, and the final certificate as the case runs, so jurors and the frontend
+read live state from Terse rather than from the process that produced it. The
+Rust Clerk admits only what it receives from Relay and persists to Terse before
+announcing a phase. Both integrations are verified against local Relay and
+Terse runtimes; hosted operation is not yet verified.
+
+**Originality.** The jury is a protocol, not a prompt. Blind ballots are
+commitments bound to fresh nonces, reveals are gated by Clerk-signed phase
+closes, evidence is Oracle-attested, the transcript is a hash chain, and the
+verifier replays the whole transcript instead of trusting the Clerk. When we
+found that any agent in a Relay workspace can read DM bodies through search,
+we sealed the ballots end to end with X25519 and AES-256-GCM so the transport
+leak cannot un-blind a vote.
+
+**Execution and demo.** `cargo run --bin run_case` produces a verifiable case
+in memory in under a second; `node src/run-live.js` runs the same protocol
+over live Relay and Terse; three public fixtures (valid, tampered by one word,
+NO_QUORUM) verify identically in Rust and in WASM. The test suites cover the
+protocol replay, the actors, the daemon contract, the Relay and Terse
+integrations, the sealed-intent cryptography, and live end-to-end cases
+including a forging agent, a persistence failure, and an early reveal attempt.
+The demo flow lives in `apps/web/README.md`.
+
+**User experience and design.** The frontend team owns the experience: a 3D
+courtroom that plays a case, a certificate page where Verify shows the checks
+and Tamper breaks the seal, a side-by-side replay of open debate (C2) against
+the signed protocol (C5), and a results ladder. The backend's contribution to
+that design is a single JSON bundle per case and a `verifyCert` call that runs
+in the browser.
+
+**Potential and impact.** Verdicts from AI deliberation are entering
+decisions that affect people. A certificate that any third party can replay
+turns "the model said so" into an auditable record of who was allowed to
+speak, what evidence was attested, and how the quorum was reached. The runs in
+this repository are scripted integration evidence; measured bias results with
+real-model jurors belong to the evaluation team and are labelled as such in
+the results page until they land.
 
 ## Repository structure and ownership
 
