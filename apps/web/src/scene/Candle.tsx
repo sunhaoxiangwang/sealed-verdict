@@ -41,7 +41,7 @@ export default function Candle({ position, seed = 0 }: { position: [number, numb
   useFrame((state) => {
     const t = state.clock.elapsedTime;
     const f = flicker(t, seed + 1);
-    if (light.current) light.current.intensity = 2.2 * (1 + 0.15 * f);
+    if (light.current) light.current.intensity = 1.3 * (1 + 0.15 * f);
     for (const m of getMats(cache, body.current, "Candle_Ember")) m.emissiveIntensity = 2.5 * (1 + 0.2 * f);
   });
   return (
@@ -51,7 +51,7 @@ export default function Candle({ position, seed = 0 }: { position: [number, numb
           <CandleModel />
         </Safe>
       </group>
-      <pointLight ref={light} position={[0, 0.4, 0]} color="#ff9a3c" intensity={2.2} distance={3.0} decay={2} />
+      <pointLight ref={light} position={[0, 0.4, 0]} color="#ff9a3c" intensity={1.3} distance={3.0} decay={2} />
     </group>
   );
 }

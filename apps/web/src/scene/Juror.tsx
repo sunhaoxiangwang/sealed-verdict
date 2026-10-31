@@ -8,15 +8,24 @@ import Safe from "./Safe";
 import Candle from "./Candle";
 import { BYZ, JUROR_LAYOUT, VOTE_COLOR, damp, facingBench, flicker, getMats, newCache } from "./hooks";
 
-function WraithModel() {
-  const { scene } = useGLTF("/models/wraith.glb");
+const PERSONA_MODEL: Record<string, string> = {
+  skeptic: "/models/juror_skeptic.glb",
+  "domain expert": "/models/juror_expert.glb",
+  "devil's advocate": "/models/juror_advocate.glb",
+  statistician: "/models/juror_statistician.glb",
+};
+const modelFor = (persona?: string) => PERSONA_MODEL[(persona ?? "").toLowerCase()] ?? "/models/wraith.glb";
+
+function WraithModel({ url }: { url: string }) {
+  const { scene } = useGLTF(url);
   const obj = useMemo(() => {
     const c = clone(scene);
     c.traverse((o) => {
       const m = o as Mesh;
       if (!m.isMesh) return;
       m.castShadow = true;
-      if (o.name === "Wraith_Core" && !Array.isArray(m.material)) m.material = m.material.clone(); // per-instance glow
+      if (/^(Head|Neck|Hand)/.test(o.name) && !Array.isArray(m.material) && "color" in m.material) (m.material as MeshStandardMaterial).color.set("#8a9184");
+      if (o.name.startsWith("Wraith_Core") && !Array.isArray(m.material)) m.material = m.material.clone(); // per-instance glow
     });
     return c;
   }, [scene]);
@@ -133,7 +142,7 @@ export default function Juror({ index }: { index: number }) {
       <group position={[L.x, 0, L.z]} rotation-y={rotY}>
         <group ref={bob}>
           <Safe fallback={<WraithFallback />}>
-            <WraithModel />
+            <WraithModel url={modelFor(data?.persona)} />
           </Safe>
           <group position={[0, 2.5, 0]}>
             <group ref={sealed} visible={false}>

@@ -53,7 +53,7 @@ export function getMats(c: MatCache, root: Object3D | null, name: string | null)
     c.mats = [];
     root?.traverse((o) => {
       const m = o as Mesh;
-      if (m.isMesh && (name === null || o.name === name) && !Array.isArray(m.material) && "emissive" in m.material) {
+      if (m.isMesh && (name === null || o.name.startsWith(name)) && !Array.isArray(m.material) && "emissive" in m.material) {
         c.mats.push(m.material as MeshStandardMaterial);
       }
     });
