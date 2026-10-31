@@ -28,3 +28,6 @@ apps/actors/bridge/.env
 apps/actors/bridge/terse/.env
 apps/actors/bridge/terse/node_modules/
 apps/actors/bridge/.tokens/
+# Blender auto-backups
+*.blend1
+*.blend2
