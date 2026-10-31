@@ -6,51 +6,95 @@ every message over Agent Relay, keeps each case's state in a Terse durable
 actor, and ships every verdict with a certificate that anyone can verify
 offline, in Rust or in the browser through the same WebAssembly verifier.
 
-## How it maps to the judging criteria
+## Why we deserve each 20% of the rubric
 
-**Real-time AI and the Terse and Agent Relay tracks.** Every protocol message
-of a live case is an Agent Relay message: Oracle evidence, sealed commitments,
-reveals, arguments, Clerk phase markers, and the final certificate each travel
-on a per-case channel (`sv-<caseId>-*`) in real time, and jurors submit their
-ballots as private Relay DMs to the Clerk agent. Each case is a Terse durable
-actor that stores the registry, the open phase and its deadline, every ledger
-entry, and the final certificate as the case runs, so jurors and the frontend
-read live state from Terse rather than from the process that produced it. The
-Rust Clerk admits only what it receives from Relay and persists to Terse before
-announcing a phase. Both integrations are verified against local Relay and
-Terse runtimes; hosted operation is not yet verified.
+### Use of Real-Time AI and Track Technology (20%)
 
-**Originality.** The jury is a protocol, not a prompt. Blind ballots are
-commitments bound to fresh nonces, reveals are gated by Clerk-signed phase
-closes, evidence is Oracle-attested, the transcript is a hash chain, and the
-verifier replays the whole transcript instead of trusting the Clerk. When we
-found that any agent in a Relay workspace can read DM bodies through search,
-we sealed the ballots end to end with X25519 and AES-256-GCM so the transport
-leak cannot un-blind a vote.
+*How meaningfully does the project use AI in real time? For the Terse and
+Agent Relay track prizes, how effectively does it use the corresponding
+technology?*
 
-**Execution and demo.** `cargo run --bin run_case` produces a verifiable case
-in memory in under a second; `node src/run-live.js` runs the same protocol
-over live Relay and Terse; three public fixtures (valid, tampered by one word,
-NO_QUORUM) verify identically in Rust and in WASM. The test suites cover the
-protocol replay, the actors, the daemon contract, the Relay and Terse
-integrations, the sealed-intent cryptography, and live end-to-end cases
-including a forging agent, a persistence failure, and an early reveal attempt.
-The demo flow lives in `apps/web/README.md`.
+The AI is the jury: four LLM jurors (`apps/jurors`, real models when
+`OPENAI_API_KEY` is set) read the case, commit to a blind vote, reveal, argue
+with each other citing attested evidence, and vote again, all live on Agent
+Relay. Every protocol message is a Relay message on a per-case channel
+(`sv-<caseId>-evidence`, `commit-<round>`, `reveal-<round>`, `argument`,
+`phase`, `cert`), ballots travel as sealed Relay DMs to the Clerk agent, and the
+Clerk admits nothing it did not receive from Relay. Each case is a Terse
+durable actor holding the registry, the open phase and its deadline, every
+ledger entry, and the final certificate while the case runs, so jurors and the
+frontend read live state from Terse instead of from the process that produced
+it, and the Clerk persists each transition to Terse before announcing the next
+phase. Neither sponsor platform is decorative: Relay is the only transport and
+Terse is the only durable state. Both integrations are verified end to end
+against local Relay and Terse runtimes; hosted operation is not yet verified.
 
-**User experience and design.** The frontend team owns the experience: a 3D
-courtroom that plays a case, a certificate page where Verify shows the checks
-and Tamper breaks the seal, a side-by-side replay of open debate (C2) against
-the signed protocol (C5), and a results ladder. The backend's contribution to
-that design is a single JSON bundle per case and a `verifyCert` call that runs
-in the browser.
+### Originality and Creativity (20%)
 
-**Potential and impact.** Verdicts from AI deliberation are entering
-decisions that affect people. A certificate that any third party can replay
-turns "the model said so" into an auditable record of who was allowed to
-speak, what evidence was attested, and how the quorum was reached. The runs in
-this repository are scripted integration evidence; measured bias results with
-real-model jurors belong to the evaluation team and are labelled as such in
-the results page until they land.
+*How fresh and inventive is the idea? Does it demonstrate an unexpected or
+creative use of real-time AI?*
+
+Most multi-agent demos make agents talk. We make them vote under rules that
+survive a dishonest participant. The jury is a protocol, not a prompt: blind
+ballots are hash commitments bound to fresh nonces, reveals open only after a
+Clerk-signed phase close, evidence is Oracle-attested and anything unsigned is
+tagged UNATTESTED and weighs nothing, the whole transcript is a hash chain, and
+the verifier replays that transcript rather than trusting the Clerk. The
+creative turn came from the platform itself: we found that any agent in a
+Relay workspace can read DM bodies through search, so we sealed ballots end to
+end (X25519, HKDF, AES-256-GCM, bound to case and sender) and turned a
+transport limitation into a demonstrable security property.
+
+### Execution and Demo (20%)
+
+*How well does the project work? Consider functionality, polish, and how
+clearly and convincingly the demo communicates the concept.*
+
+It runs. `cargo run --bin run_case` produces a verifiable case in memory in
+under a second; `node src/run-live.js` runs the same protocol over live Relay
+and Terse and exits non-zero unless the certificate verifies; three public
+fixtures (valid, tampered by a single word, NO_QUORUM) verify identically in
+Rust and in WebAssembly. The suites cover protocol replay, actors, the daemon
+contract, the Relay and Terse integrations, the sealed-ballot cryptography,
+and live end-to-end cases with a forging fifth agent, an injected persistence
+failure, and an early reveal attempt. The demo (`apps/web/README.md`) plays a
+case in the courtroom, flips a juror Byzantine and shows the quorum hold,
+verifies the certificate and breaks it with one tampered word, and replays the
+same case under open debate (C2) next to the signed protocol (C5).
+
+### User Experience and Design (20%)
+
+*Is the experience intuitive, cohesive, and thoughtfully designed? Does the
+design support the project's intended use?*
+
+The design makes an invisible guarantee visible. A 3D courtroom gives each
+phase a physical moment: evidence is attested (a forged item shows red),
+sealed commits land, reveals open, deliberation plays, the seal drops. The
+certificate page turns verification into five checks a judge can watch pass,
+and a Tamper button cracks the seal so the audience sees what the hash chain
+protects. The C2-versus-C5 replay puts herding and the protocol side by side,
+and the results ladder walks the conditions in order. Underneath, the backend
+hands the frontend one JSON bundle per case and a single `verifyCert` call
+that runs in the browser, so the interface never has to trust a server to
+say "verified".
+
+### Potential and Impact (20%)
+
+*Does the project address a meaningful problem or demonstrate a compelling use
+case? Could the idea be developed further?*
+
+AI deliberation is already being used to judge content, grade work, and
+screen people, and our thesis is that letting models read each other
+amplifies bias rather than cancelling it. A verdict that ships with a
+replayable certificate turns "the model said so" into an auditable record of
+who was allowed to speak, what evidence was attested, and how the quorum was
+reached, which is what a regulator, an appeals process, or a downstream model
+needs. The protocol is model-agnostic and transport-agnostic in design, the
+verifier already runs in any browser, and the preregistered evaluation
+(`eval/`) is built to measure the bias claim across BBQ, position bias, and
+forged-evidence arms. The runs in this repository are scripted integration
+evidence; measured results with real-model jurors come from that evaluation
+and are labelled as illustrative until they land.
 
 ## Repository structure and ownership
 
