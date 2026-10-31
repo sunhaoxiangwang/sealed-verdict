@@ -423,6 +423,53 @@ single WASM export, and parses the report. There is no second verifier.
 Fixtures contain public keys, signatures, certificates, and transcripts only.
 Signing keys exist in memory during generation and are discarded.
 
+## Live mode: clerk daemon and bridge
+
+Live cases keep every protocol decision in Rust. `clerk_daemon`
+(`apps/actors/src/daemon.rs`, binary `clerk_daemon`) owns the Clerk, Ledger,
+Oracle, juror signing shells, and all private keys for exactly one fresh case.
+A thin Node bridge (`apps/actors/bridge`) moves bytes between Agent Relay,
+the daemon, and the Terse case actor. The bridge never signs, hashes, admits,
+or tallies.
+
+Transport is JSON lines on stdin/stdout. Requests are `{ id, cmd, ... }`;
+replies are `{ id, ok: true, result }` or `{ id, ok: false, error: { code,
+message } }`. Diagnostics go to stderr only. Phase closes are reported solely
+through the `tick` reply; there is no unsolicited event.
+
+| Command | Parameters | Result | Error codes |
+| --- | --- | --- | --- |
+| `open` | `caseId`, `condition`, `choices`, `context: [{ source, content }]`, `jurors: [{ id, sender }]`, `timeoutMs?` | `registry`, `evidence: Signed<Evidence>[]` (to publish, not yet admitted), `phase`, `head` | `case_open`, `bad_request` |
+| `sign` | `sender` (registered Relay sender id), `kind: commit \| reveal \| argument`, `round`, `vote?`, `confidence?`, `text?`, `evidenceIds?` | `envelope`, `channel: { kind, round }` | `unknown_sender`, `wrong_phase`, `invalid_vote`, `invalid_confidence`, `no_commit` |
+| `admit` | `kind: evidence \| commit \| reveal \| argument`, `msg` (envelope exactly as received) | `entry: LedgerEntry`, `admission`, `head` | `forbidden_kind` (phase), `already_finished` |
+| `tick` | `nowMs` | `closed: LedgerEntry \| null`, `phase: { phase, round, deadlineMs, closed }`, `head`, `nowMs` | |
+| `phase` | | `phase`, `head`, `len`, `finished` | |
+| `finish` | `outDir?` | `cert` (VerdictCert), `report` (VerifyReport), `path` | `not_closed`, `already_finished` |
+
+Rules the daemon enforces:
+
+- One process, one case. A second `open` fails with `case_open`; a new attempt
+  uses a new daemon and a new case id.
+- `sign` binds `caseId` internally and requires the open window to match:
+  commits need `commit/<round>`, reveals need `reveal/<round>` and a pending
+  commit from the same shell, arguments need `deliberate/0`. Sender identity is
+  the server-assigned Relay id captured at registration, never a display name
+  or a payload field.
+- `sign` never admits. Only envelopes received from Relay enter `admit`.
+- The injected clock advances monotonically to `max(current, nowMs)`; a
+  reordered older tick cannot rewind it. Each tick closes at most one phase.
+- The certificate covers the transcript through the round-1 reveal close,
+  captured at that moment. Messages admitted afterwards stay in the ledger as
+  trailing entries outside `transcriptLen`.
+- The bridge serializes DMs, channel envelopes, and 250 ms ticks through one
+  per-case queue, persists each entry or phase transition to Terse before
+  publishing anything derived from it, and exits non-zero on daemon or
+  persistence failure. The case is then aborted.
+
+Trust assumption: juror signing keys are held centrally by the daemon and
+used on behalf of the authenticated Relay sender. This is a prototype
+convenience, recorded under Known limits.
+
 ## Planned Relay channels
 
 Not part of WP1. When transport moves off the in-memory Ledger, each case
@@ -466,6 +513,12 @@ HTTP or Node boundary.
   into `transcriptRoot`, are not replayed, and carry no assurance.
 - **C2 does not authenticate jurors.** C2 certificates prove ledger order and
   phase sequence only.
+- **Central key custody in live mode.** The daemon signs juror ballots on
+  behalf of authenticated Relay senders; jurors never hold their own protocol
+  keys in WP2.
+- **No recovery.** Daemon or persistence failure aborts the live case. Keys
+  live only in the daemon process and are not reconstructed from registry or
+  transcript data; the next attempt is a new case id.
 - `Argument.prevHash` is informational and unchecked.
 - No semantic check that cited evidence supports an argument.
 - No recovery, restart, or re-delivery; a missed phase is an abstention.

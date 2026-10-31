@@ -33,6 +33,10 @@ pub struct Clerk {
     timeout_ms: u64,
     deadline_ms: u64,
     engine: Engine,
+    /// `(transcriptLen, transcriptRoot)` captured at the round-1 reveal close.
+    /// Messages that arrive afterwards stay in the ledger as unverified
+    /// trailing entries and never enter the certificate.
+    final_boundary: Option<(u64, String)>,
 }
 
 impl Clerk {
@@ -53,6 +57,7 @@ impl Clerk {
             timeout_ms: phase_timeout_ms,
             deadline_ms,
             engine,
+            final_boundary: None,
         }
     }
 
@@ -206,6 +211,9 @@ impl Clerk {
             )));
         }
         ledger.append(EntryKind::Phase, value, admission)?;
+        if self.engine.is_closed() {
+            self.final_boundary = Some((ledger.len(), ledger.root_hex()));
+        }
         self.deadline_ms = self.clock.now_ms() + self.timeout_ms;
         Ok(marker)
     }
@@ -217,9 +225,9 @@ impl Clerk {
     /// Build the certificate body from accepted round-1 reveals and ask the
     /// Ledger to sign it. Only valid after the round-1 reveal close.
     pub fn issue_verdict(&self, ledger: &Ledger) -> Result<VerdictCert, ActorError> {
-        if !self.engine.is_closed() {
+        let Some((transcript_len, transcript_root)) = self.final_boundary.clone() else {
             return Err(ActorError::NotClosed(self.registry.case_id.clone()));
-        }
+        };
         let tally = self.engine.tally();
         let votes = self
             .engine
@@ -236,8 +244,8 @@ impl Clerk {
                 needed: QUORUM_NEEDED,
                 counted: tally.counted,
             },
-            transcript_root: ledger.root_hex(),
-            transcript_len: ledger.len(),
+            transcript_root,
+            transcript_len,
             evidence_ids: self.engine.certificate_evidence_ids(),
             registry: self.registry.clone(),
             votes,

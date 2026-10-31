@@ -12,6 +12,7 @@
 
 pub mod clerk;
 pub mod clock;
+pub mod daemon;
 pub mod error;
 pub mod juror;
 pub mod ledger;
