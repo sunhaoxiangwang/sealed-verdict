@@ -323,3 +323,63 @@ fn full_live_flow_certifies_three_one() {
     assert_eq!(err(call(&mut d, "finish", json!({}))), "already_finished");
     std::fs::remove_dir_all(path.parent().unwrap()).ok();
 }
+
+#[test]
+fn duplicate_commit_intent_keeps_first_ballot_revealable() {
+    let mut d = daemon();
+    let r = ok(call(&mut d, "open", open_params("live-dup", "C3")));
+    for ev in r["evidence"].as_array().unwrap() {
+        admit(&mut d, "evidence", ev);
+    }
+    close(&mut d); // attest -> commit/0
+    let first = ok(call(
+        &mut d,
+        "sign",
+        json!({"sender": "S1", "kind": "commit", "round": 0, "vote": "ans0", "confidence": 70}),
+    ));
+    assert_eq!(
+        admit(&mut d, "commit", &first["envelope"])["entry"]["status"],
+        "accepted"
+    );
+    // A second intent in the same round is refused and must not disturb the first.
+    assert_eq!(
+        err(call(
+            &mut d,
+            "sign",
+            json!({"sender": "S1", "kind": "commit", "round": 0, "vote": "ans1", "confidence": 10})
+        )),
+        "duplicate_commit"
+    );
+    // Another shell is unaffected.
+    let other = ok(call(
+        &mut d,
+        "sign",
+        json!({"sender": "S2", "kind": "commit", "round": 0, "vote": "ans1", "confidence": 50}),
+    ));
+    assert_eq!(
+        admit(&mut d, "commit", &other["envelope"])["entry"]["status"],
+        "accepted"
+    );
+    close(&mut d); // commit/0 -> reveal/0
+    let rv = ok(call(
+        &mut d,
+        "sign",
+        json!({"sender": "S1", "kind": "reveal", "round": 0}),
+    ));
+    assert_eq!(rv["envelope"]["body"]["vote"], "ans0");
+    assert_eq!(rv["envelope"]["body"]["confidence"], 70);
+    assert_eq!(
+        admit(&mut d, "reveal", &rv["envelope"])["entry"]["status"],
+        "accepted"
+    );
+    let rv2 = ok(call(
+        &mut d,
+        "sign",
+        json!({"sender": "S2", "kind": "reveal", "round": 0}),
+    ));
+    assert_eq!(rv2["envelope"]["body"]["vote"], "ans1");
+    assert_eq!(
+        admit(&mut d, "reveal", &rv2["envelope"])["entry"]["status"],
+        "accepted"
+    );
+}

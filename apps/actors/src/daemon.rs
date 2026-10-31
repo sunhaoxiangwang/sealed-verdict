@@ -338,7 +338,15 @@ impl Daemon {
                 }
                 (
                     "commit",
-                    serde_json::to_value(shell.commit(p.round, &vote, confidence)?)?,
+                    serde_json::to_value(shell.commit(p.round, &vote, confidence).map_err(
+                        |e| match e {
+                            crate::error::ActorError::DuplicateCommit(_, r) => fail(
+                                "duplicate_commit",
+                                format!("a commitment for round {r} already exists; the first commitment stands"),
+                            ),
+                            other => other.into(),
+                        },
+                    )?)?,
                 )
             }
             "reveal" => {

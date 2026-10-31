@@ -13,6 +13,17 @@
 //   relay.addListener("message.created" | "dm.received", ({ message, envelope }) => ...)
 //   message.from.id / envelope.from.id is the authenticated sender id
 //   createAgentClient({ agentToken, baseUrl }) -> thin client: send, dm, channels.join, messages
+//
+// Recipient identity: a `dm.received` event carries no recipient id (verified
+// live against the pinned engine: `envelope.to` is undefined and the message
+// has only `conversationId`), and the workspace-level hub fans in every
+// registered agent's own node stream while discarding which stream delivered
+// the event. The authenticated recipient is therefore stream ownership: the
+// `relay` instance returned by `connectBridge` has the clerk as its ONLY
+// registered agent, so every DM it receives was delivered by the engine to the
+// clerk's token. All other agents (tap, jurors, extras) live on a second
+// instance (`observers`), whose DMs have no single authenticated recipient and
+// are dropped by `onDirectIntent`.
 
 import { randomUUID } from "node:crypto";
 import { AgentRelay } from "@agent-relay/sdk";
@@ -69,31 +80,42 @@ export function tapAgentName(caseId) {
   return `sv-${caseId}-tap`;
 }
 
+/** Marks a hub whose only registered agent is the authenticated DM recipient. */
+const RECIPIENT = Symbol("sealed-verdict.recipient");
+/** Links the clerk hub to the hub that carries the tap and juror streams. */
+const OBSERVERS = Symbol("sealed-verdict.observers");
+
 /**
- * Register the bridge (clerk) agent, a tap agent, and one agent per juror,
- * create the case channels, and join the clerk and the tap to all of them.
+ * Register the bridge (clerk) agent on its own hub, and a tap agent plus one
+ * agent per juror on a second hub; create the case channels and join the clerk
+ * and the tap to all of them.
  *
  * The server does not echo an agent's own channel posts back on its realtime
- * stream (verified against the pinned engine), so the tap agent, registered on
- * the same AgentRelay instance, is what makes `onChannelEnvelope` observe the
- * clerk's own publications. With the tap joined, each channel message is
- * delivered to the listener exactly once (verified: no duplicates).
+ * stream (verified against the pinned engine), so the tap agent is what makes
+ * `onChannelEnvelope` observe the clerk's own publications. Keeping the clerk
+ * alone on `relay` is what authenticates DM recipients: see the module header.
  *
  * Returns server-assigned ids. Juror tokens are returned so the caller can hand
- * each juror its own credential privately; never log them.
+ * each juror its own credential privately; never log them. `registerObserver`
+ * registers an extra agent (for example a test intruder) on the observer hub so
+ * it can never pollute the clerk's DM stream.
  */
 export async function connectBridge({ workspaceKey, baseUrl = DEFAULT_BASE_URL, caseId, jurorIds }) {
   if (!workspaceKey) throw new Error("workspaceKey is required");
   const relay = new AgentRelay({ workspaceKey, baseUrl });
+  const observers = new AgentRelay({ workspaceKey, baseUrl });
 
   const clerk = await relay.workspace.register({ name: clerkAgentName(caseId), type: "agent" });
+  relay[RECIPIENT] = { id: clerk.id, name: clerk.name };
+  relay[OBSERVERS] = observers;
+
   const jurors = new Map();
   for (const jurorId of jurorIds) {
-    const reg = await relay.workspace.register({ name: jurorAgentName(caseId, jurorId), type: "agent" });
+    const reg = await observers.workspace.register({ name: jurorAgentName(caseId, jurorId), type: "agent" });
     jurors.set(jurorId, { id: reg.id, name: reg.name, token: reg.token });
   }
 
-  const tap = await relay.workspace.register({ name: tapAgentName(caseId), type: "agent" });
+  const tap = await observers.workspace.register({ name: tapAgentName(caseId), type: "agent" });
 
   const channels = caseChannels(caseId);
   for (const name of channels) {
@@ -102,7 +124,9 @@ export async function connectBridge({ workspaceKey, baseUrl = DEFAULT_BASE_URL, 
     await tap.channels.join(name);
   }
 
-  return { relay, clerk, clerkId: clerk.id, clerkName: clerk.name, tapId: tap.id, jurors, channels };
+  const registerObserver = (suffix) => observers.workspace.register({ name: `sv-${caseId}-${suffix}`, type: "agent" });
+
+  return { relay, observers, clerk, clerkId: clerk.id, clerkName: clerk.name, tapId: tap.id, jurors, channels, registerObserver };
 }
 
 /** Publish an object as JSON text to a channel. Returns `{ messageId }`. */
@@ -127,39 +151,64 @@ function parseJson(text) {
 /**
  * Listen for messages on this case's public channels. The handler receives
  * `{ channel, kind, round, messageId, fromId, text, obj | parseError }`.
- * Returns an unsubscribe function.
+ * Subscribes on the given hub and on its linked observer hub (where the tap
+ * lives), delivering each message id once. Returns an unsubscribe function.
  */
 export function onChannelEnvelope(relay, caseId, handler) {
-  return relay.addListener("message.created", (event) => {
-    const { message, envelope } = event;
-    const channel = envelope?.channel?.name ?? message?.channel?.name;
-    const parsed = parseChannelName(caseId, channel);
-    if (!parsed) return;
-    const text = message?.text ?? "";
-    handler({
-      channel,
-      kind: parsed.kind,
-      round: parsed.round,
-      messageId: message?.messageId ?? message?.id,
-      fromId: senderId(message, envelope),
-      text,
-      ...parseJson(text),
+  const seen = new Set();
+  const remember = (id) => {
+    if (id == null) return true;
+    if (seen.has(id)) return false;
+    seen.add(id);
+    if (seen.size > 4096) seen.delete(seen.values().next().value);
+    return true;
+  };
+  const listen = (hub) =>
+    hub.addListener("message.created", (event) => {
+      const { message, envelope } = event;
+      const channel = envelope?.channel?.name ?? message?.channel?.name;
+      const parsed = parseChannelName(caseId, channel);
+      if (!parsed) return;
+      const messageId = message?.messageId ?? message?.id;
+      if (!remember(messageId)) return;
+      const text = message?.text ?? "";
+      handler({
+        channel,
+        kind: parsed.kind,
+        round: parsed.round,
+        messageId,
+        fromId: senderId(message, envelope),
+        text,
+        ...parseJson(text),
+      });
     });
-  });
+  const offs = [listen(relay)];
+  if (relay[OBSERVERS]) offs.push(listen(relay[OBSERVERS]));
+  return () => offs.forEach((off) => off());
 }
 
 /**
  * Listen for direct messages to the bridge agent. The handler receives
- * `{ fromId, messageId, text, obj | parseError }`. Identity is the
- * server-assigned sender id only.
+ * `{ fromId, toId, messageId, text, obj | parseError }`. `fromId` is the
+ * server-assigned sender id; `toId` is the authenticated recipient, known
+ * only because the hub's sole registered agent is the clerk (see header).
+ * DMs arriving on a hub without that single authenticated recipient are
+ * dropped with one stderr line and never reach the handler.
  */
 export function onDirectIntent(relay, handler) {
+  const recipient = relay[RECIPIENT] ?? null;
   return relay.addListener("dm.received", (event) => {
     const { message, envelope } = event;
+    const messageId = message?.messageId ?? message?.id;
+    if (!recipient) {
+      process.stderr.write(`[relay] dropped DM ${messageId}: no authenticated recipient\n`);
+      return;
+    }
     const text = message?.text ?? "";
     handler({
       fromId: senderId(message, envelope),
-      messageId: message?.messageId ?? message?.id,
+      toId: recipient.id,
+      messageId,
       text,
       ...parseJson(text),
     });

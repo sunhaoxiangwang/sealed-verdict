@@ -465,6 +465,12 @@ Rules the daemon enforces:
   per-case queue, persists each entry or phase transition to Terse before
   publishing anything derived from it, and exits non-zero on daemon or
   persistence failure. The case is then aborted.
+- Finalization is staged. `finish` writes the bundle into
+  `out/.staging/<caseId>/`, the bridge writes the Relay sidecar beside it,
+  requires `report.valid`, stores the certificate in Terse, and only then
+  moves both files to `out/<caseId>.json` and `out/<caseId>.relay.json` and
+  publishes `{ cert }` on the cert channel. On failure the staged and any
+  already-moved files of that case are removed and nothing is published.
 
 Trust assumption: juror signing keys are held centrally by the daemon and
 used on behalf of the authenticated Relay sender. This is a prototype
@@ -510,7 +516,7 @@ sv-<caseId>-commit-<round>
 sv-<caseId>-reveal-<round>
 sv-<caseId>-argument
 sv-<caseId>-phase       { marker: Signed<PhaseMarker>, next: { phase, round, deadlineMs } | "verdict" }
-sv-<caseId>-cert        { caseId, verdict, valid, failures }
+sv-<caseId>-cert        { cert: Signed<CertBody> }   the Ledger-signed certificate envelope
 ```
 
 Messages are JSON text. Only envelopes received on the evidence, commit,
@@ -523,11 +529,18 @@ frozen LedgerEntry fields.
 
 Signing intents are private: a juror sends `{ kind: "commit" | "reveal" |
 "argument", round, vote?, confidence?, text?, evidenceIds? }` as a Relay DM
-to the clerk agent. The bridge binds the DM's authenticated sender id
-(`message.from.id`, verified against the installed SDK types and a real DM)
-to that juror's signing shell, asks the daemon to sign, publishes the signed
-envelope on the public channel, and DMs back `{ ok, kind, round, messageId }`
-or `{ ok: false, error }`. Plaintext votes and nonces never appear on a public
+to the clerk agent. The bridge acts only when both authenticated identities
+match: the recipient id (`envelope.to`, verified against the installed SDK
+types and a live DM) must be this case's clerk agent and the sender id
+(`message.from.id`) must be a registered juror; a DM without an
+authenticated recipient is dropped before it reaches the bridge, and a
+juror-to-juror DM or an unknown sender is ignored and counted, never signed.
+The bridge then asks the daemon to sign, publishes the signed envelope on
+the public channel, and DMs back `{ ok, kind, round, messageId }` or
+`{ ok: false, error }`. The first commitment per juror and round wins: a
+second commit intent in the same round is answered `duplicate_commit` and
+leaves the first vote and nonce untouched, so the later reveal still
+matches. Plaintext votes and nonces never appear on a public
 channel before the reveal window; the acceptance test
 `apps/actors/bridge/test/live-e2e.mjs` checks every public channel for this.
 

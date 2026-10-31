@@ -16,6 +16,8 @@ pub enum ActorError {
     AlreadyClosed(String),
     #[error("juror {0} has no pending ballot for round {1}")]
     NoPendingBallot(String, u8),
+    #[error("juror {0} already committed in round {1}")]
+    DuplicateCommit(String, u8),
     #[error("{0}")]
     Other(String),
 }

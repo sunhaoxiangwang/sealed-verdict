@@ -76,13 +76,19 @@ impl JurorShell {
     }
 
     /// Commit to a vote with a fresh random nonce. The nonce is remembered
-    /// for `reveal`; committing again in the same round replaces it.
+    /// for `reveal`. First commitment wins: a second commit in the same round
+    /// is rejected with `DuplicateCommit` and leaves the pending vote,
+    /// confidence, and nonce untouched, so the already-admitted commitment
+    /// stays revealable.
     pub fn commit(
         &mut self,
         round: u8,
         vote: &str,
         confidence: u8,
     ) -> Result<Signed<Commit>, ActorError> {
+        if self.pending.contains_key(&round) {
+            return Err(ActorError::DuplicateCommit(self.id.clone(), round));
+        }
         let nonce = random_nonce_hex();
         let commitment = commitment_hex(&self.case_id, round, &self.id, vote, &nonce)?;
         self.pending.insert(

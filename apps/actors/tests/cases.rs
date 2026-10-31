@@ -126,6 +126,13 @@ fn first_ballot_wins_later_audit_only() {
     assert!(run.report.valid, "{:?}", run.report.failures);
     assert_eq!(run.cert.cert.body.verdict, "ans2");
     assert_eq!(run.cert.cert.body.quorum.counted, 4);
+    // juror-1's round-1 reveal still matches its first commitment.
+    assert!(run.cert.transcript.iter().any(|e| {
+        e.status == EntryStatus::Accepted
+            && e.msg["body"]["juror"] == "juror-1"
+            && e.msg["body"]["round"] == 1
+            && e.msg["body"]["nonce"].is_string()
+    }));
     let rejected = run
         .cert
         .transcript

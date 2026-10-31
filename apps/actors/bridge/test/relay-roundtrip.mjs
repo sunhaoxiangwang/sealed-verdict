@@ -3,9 +3,10 @@
 //   RELAY_WORKSPACE_KEY=... [RELAY_BASE_URL=http://127.0.0.1:8787] node --test test/relay-roundtrip.mjs
 //
 // Proves: a public channel envelope round-trips byte for byte with its message
-// id; DM sender identity is the server-assigned registration id; a fifth agent
-// is distinguishable from every juror; a string sent only by DM never appears
-// on any public channel.
+// id; DM sender identity is the server-assigned registration id; the DM
+// recipient surfaced as `toId` is the clerk and only clerk-addressed DMs reach
+// the intent handler; a fifth agent is distinguishable from every juror; a
+// string sent only by DM never appears on any public channel.
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -48,9 +49,11 @@ test("relay transport: channel roundtrip, DM identity, intruder, privacy", { ski
   const jurorIds = ["juror-1", "juror-2"];
   const bridge = await connectBridge({ workspaceKey, baseUrl, caseId, jurorIds });
   t.after(async () => {
-    try {
-      await bridge.relay.messaging?.events?.disconnect?.();
-    } catch {}
+    for (const hub of [bridge.relay, bridge.observers]) {
+      try {
+        await hub.messaging?.events?.disconnect?.();
+      } catch {}
+    }
   });
 
   assert.equal(bridge.channels.length, 8);
@@ -89,18 +92,42 @@ test("relay transport: channel roundtrip, DM identity, intruder, privacy", { ski
   const j1 = bridge.jurors.get("juror-1");
   const j2 = bridge.jurors.get("juror-2");
 
-  await t.test("DM sender identity equals the registered juror id", async () => {
+  await t.test("DM to the clerk: sender is the registered juror id, recipient is the clerk", async () => {
     const client = jurorClient({ agentToken: j1.token, baseUrl });
     const intent = { kind: "commit", round: 0, vote: "ans2", confidence: 80, probe };
     await client.dm(clerkAgentName(caseId), JSON.stringify(intent));
     const got = await waitFor(() => dms.find((m) => m.obj && m.obj.probe === probe), { label: "dm" });
     assert.equal(got.fromId, j1.id);
     assert.notEqual(got.fromId, j2.id);
+    assert.equal(got.toId, bridge.clerkId);
     assert.deepEqual(got.obj, intent);
   });
 
+  await t.test("DM between jurors never reaches the clerk intent handler", async () => {
+    const sideProbe = `juror-dm-${randomBytes(6).toString("hex")}`;
+    const observerIntents = [];
+    const rawObserverDms = [];
+    const offIntent = onDirectIntent(bridge.observers, (m) => observerIntents.push(m));
+    const offRaw = bridge.observers.addListener("dm.received", (e) => rawObserverDms.push(e));
+    try {
+      const client = jurorClient({ agentToken: j1.token, baseUrl });
+      await client.dm(j2.name, JSON.stringify({ kind: "commit", round: 0, vote: "ans0", probe: sideProbe }));
+      // Delivery happened: the recipient juror's stream (on the observer hub) saw it from juror-1.
+      const raw = await waitFor(() => rawObserverDms.find((e) => (e.message?.text ?? "").includes(sideProbe)), { label: "raw juror dm" });
+      assert.equal(raw.message.from.id, j1.id);
+      await new Promise((r) => setTimeout(r, 1000));
+      // The clerk hub carries only clerk-addressed DMs, so the intent handler never saw it.
+      assert.equal(dms.filter((m) => m.obj && m.obj.probe === sideProbe).length, 0, "juror-to-juror DM leaked into the clerk intent handler");
+      // A hub without a single authenticated recipient drops DMs instead of guessing.
+      assert.equal(observerIntents.length, 0, "observer hub must not surface intents");
+    } finally {
+      offIntent();
+      offRaw();
+    }
+  });
+
   await t.test("a fifth agent can post publicly but is not any juror", async () => {
-    const intruder = await bridge.relay.workspace.register({ name: `sv-${caseId}-intruder`, type: "agent" });
+    const intruder = await bridge.registerObserver("intruder");
     const chan = channelName(caseId, "evidence");
     await intruder.channels.join(chan);
     const forged = { body: { id: "ev-forged", caseId }, sig: null, signer: null };

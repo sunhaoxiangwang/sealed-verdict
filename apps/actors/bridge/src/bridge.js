@@ -3,7 +3,7 @@
 // state) through one serialized queue. The bridge never signs, hashes,
 // admits, or tallies; it moves envelopes and persists what the daemon decides.
 
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, writeFileSync, renameSync, rmSync, existsSync } from "node:fs";
 import path from "node:path";
 
 import { DaemonClient, DaemonError } from "./daemon-client.js";
@@ -20,13 +20,18 @@ function log(...args) {
 
 /**
  * Run one live case to completion. Resolves with { cert, report, path, sidecarPath, stats }.
- * Rejects (after aborting the queue) on daemon exit or persistence failure.
+ * Rejects (after aborting the queue and removing this case's staged or final
+ * artifacts) on daemon exit, persistence failure, or an invalid certificate.
+ *
+ * `terse` may be an options object for createTerse or an already-built adapter
+ * (tests inject a failing one). `hooks.onPhase(next, ctx)` lets tests act when
+ * a window opens.
  */
 export async function runLiveCase(opts) {
   const {
     caseId, condition, choices, context, jurorIds, timeoutMs,
     relay: relayOpts, terse: terseOpts, outDir, daemonBin,
-    scripted = null, intruder = false, tokensDir = null,
+    scripted = null, intruder = false, tokensDir = null, hooks = {},
   } = opts;
 
   const conn = await connectBridge({ ...relayOpts, caseId, jurorIds });
@@ -46,10 +51,13 @@ export async function runLiveCase(opts) {
     if (!name) return;
     await conn.clerk.sendMessage({ to: `@${name}`, text: JSON.stringify(obj) });
   };
-  const terse = await createTerse(terseOpts);
+  const terse = typeof terseOpts?.appendEntry === "function" ? terseOpts : await createTerse(terseOpts);
   const queue = createCaseQueue({ onAbort: (e) => log(`ABORT: ${e.message}`) });
-  const stats = { accepted: 0, rejected: 0, unattested: 0, intents: 0, intentErrors: 0, closes: 0 };
+  const stats = { accepted: 0, rejected: 0, unattested: 0, intents: 0, intentErrors: 0, ignoredDms: 0, closes: 0 };
   const seqToMessage = {};
+  const finalPath = path.join(outDir, `${caseId}.json`);
+  const finalSidecar = path.join(outDir, `${caseId}.relay.json`);
+  const stagingDir = path.join(outDir, ".staging", caseId);
   let finished = null;
   let resolveDone, rejectDone;
   const done = new Promise((res, rej) => { resolveDone = res; rejectDone = rej; });
@@ -62,7 +70,15 @@ export async function runLiveCase(opts) {
     },
   });
 
+  function cleanupArtifacts() {
+    // Only this fresh case's files: staged bundle and anything already exposed.
+    for (const p of [stagingDir, finalPath, finalSidecar]) {
+      if (existsSync(p)) rmSync(p, { recursive: true, force: true });
+    }
+  }
+
   function abort(err) {
+    if (!queue.aborted) cleanupArtifacts();
     queue.abort(err);
     rejectDone(err);
   }
@@ -74,7 +90,9 @@ export async function runLiveCase(opts) {
   await terse.openCase(caseId, opened.registry, opened.phase, opened.head);
   log(`case ${caseId} open in Terse; attest window until ${opened.phase.deadlineMs}`);
 
+  const hookCtx = { caseId, clerkId: conn.clerkId, clerkName: conn.clerkName, jurors: conn.jurors, baseUrl: relayOpts.baseUrl };
   const scriptedJurors = scripted ? await startScriptedJurors(conn, relayOpts, scripted) : null;
+  const intruderAgent = intruder ? await prepareIntruder(conn, relayOpts, caseId, jurorIds[0]) : null;
 
   const unsubChannel = onChannelEnvelope(conn.relay, caseId, ({ kind, round, messageId, fromId, obj, parseError }) => {
     if (!ADMITTED_KINDS.has(kind)) return; // phase and cert channels are mirrors, never re-admitted
@@ -87,9 +105,15 @@ export async function runLiveCase(opts) {
     }).catch((e) => { if (!(e instanceof DaemonError) || e.code === "daemon_exit") abort(e); else log(`admit ${kind}: ${e.message}`); });
   });
 
-  const unsubDm = onDirectIntent(conn.relay, ({ fromId, messageId, obj, parseError }) => {
-    // Juror agents share this connection, so the clerk's own DM replies echo back here.
+  const unsubDm = onDirectIntent(conn.relay, ({ fromId, toId, messageId, obj, parseError }) => {
+    // The clerk hub carries only DMs the engine delivered to the clerk's own stream (toId);
+    // a signing intent additionally needs a sender bound to a registered juror shell.
     if (fromId === conn.clerkId || fromId === conn.tapId) return;
+    if (toId !== conn.clerkId || !jurorNameBySender.has(fromId)) {
+      stats.ignoredDms += 1;
+      log(`ignored DM ${messageId}: to=${toId} from=${fromId} is not juror-to-clerk`);
+      return;
+    }
     const reply = (o) => replyTo(fromId, o);
     queue.run(`intent:${messageId}`, async () => {
       stats.intents += 1;
@@ -108,6 +132,27 @@ export async function runLiveCase(opts) {
     });
   });
 
+  async function finalize() {
+    // Stage everything; expose nothing until the report is valid and Terse holds the certificate.
+    rmSync(stagingDir, { recursive: true, force: true });
+    mkdirSync(stagingDir, { recursive: true });
+    const fin = await daemon.finish(stagingDir);
+    if (!fin.report.valid) {
+      throw new Error(`certificate failed native verification: ${fin.report.failures.join("; ")}`);
+    }
+    const stagedSidecar = path.join(stagingDir, `${caseId}.relay.json`);
+    writeFileSync(stagedSidecar, JSON.stringify({ caseId, seqToMessage }, null, 2) + "\n");
+    await terse.setCertificate(caseId, fin.cert);
+    mkdirSync(outDir, { recursive: true });
+    renameSync(fin.path, finalPath);
+    renameSync(stagedSidecar, finalSidecar);
+    rmSync(stagingDir, { recursive: true, force: true });
+    // The Ledger-signed certificate envelope; the transcript stays in the bundle.
+    await publish(conn.clerk, channelName(caseId, "cert"), { cert: fin.cert.cert });
+    finished = { cert: fin.cert, report: fin.report, path: finalPath, sidecarPath: finalSidecar, stats };
+    resolveDone(finished);
+  }
+
   const timer = setInterval(() => {
     queue.run("tick", async () => {
       if (finished) return;
@@ -119,16 +164,14 @@ export async function runLiveCase(opts) {
       const next = r.phase.closed ? "verdict" : { phase: r.phase.phase, round: r.phase.round, deadlineMs: r.phase.deadlineMs };
       await publish(conn.clerk, channelName(caseId, "phase"), { marker: r.closed.msg, next });
       log(`closed ${r.closed.msg.body.phase}/${r.closed.msg.body.round}; next ${JSON.stringify(next)}`);
-      if (scriptedJurors) scriptedJurors.onPhase(next, opened);
-      if (r.phase.closed) {
-        const fin = await daemon.finish(outDir);
-        await terse.setCertificate(caseId, fin.cert);
-        await publish(conn.clerk, channelName(caseId, "cert"), { caseId, verdict: fin.cert.cert.body.verdict, valid: fin.report.valid, failures: fin.report.failures });
-        const sidecarPath = fin.path.replace(/\.json$/, ".relay.json");
-        writeFileSync(sidecarPath, JSON.stringify({ caseId, seqToMessage }, null, 2) + "\n");
-        finished = { ...fin, sidecarPath, stats };
-        resolveDone(finished);
+      if (next !== "verdict") {
+        if (intruderAgent && next.phase === "commit" && next.round === 0) {
+          intruderAgent.post().catch((e) => log(`intruder: ${e.message}`));
+        }
+        scriptedJurors?.onPhase(next);
+        hooks.onPhase?.(next, hookCtx);
       }
+      if (r.phase.closed) await finalize();
     }).catch((e) => abort(e));
   }, TICK_MS);
 
@@ -136,7 +179,6 @@ export async function runLiveCase(opts) {
   for (const ev of opened.evidence) {
     await publish(conn.clerk, channelName(caseId, "evidence"), ev);
   }
-  if (intruder) await startIntruder(conn, relayOpts, caseId, jurorIds[0]);
 
   try {
     return await done;
@@ -155,14 +197,13 @@ export async function runLiveCase(opts) {
 async function startScriptedJurors(conn, relayOpts, scripted) {
   const clients = new Map();
   for (const [jurorId, j] of conn.jurors) {
-    clients.set(jurorId, await jurorClient({ agentToken: j.token, baseUrl: relayOpts.baseUrl }));
+    clients.set(jurorId, jurorClient({ agentToken: j.token, baseUrl: relayOpts.baseUrl }));
   }
   const dm = async (jurorId, intent) => {
     await clients.get(jurorId).dm(conn.clerkName, JSON.stringify(intent));
   };
   return {
     onPhase(next) {
-      if (next === "verdict") return;
       const { phase, round } = next;
       for (const [jurorId, plan] of Object.entries(scripted.jurors)) {
         const task = (async () => {
@@ -180,17 +221,18 @@ async function startScriptedJurors(conn, relayOpts, scripted) {
   };
 }
 
-/** A fifth agent that posts a forged, unsigned commit claiming to be juror-1. */
-async function startIntruder(conn, relayOpts, caseId, victimJurorId) {
-  const reg = await conn.relay.workspace.register({ name: `sv-${caseId}-intruder`, type: "agent" });
+/** A fifth agent that posts a forged, unsigned commit claiming to be a juror once commit/0 opens. */
+async function prepareIntruder(conn, relayOpts, caseId, victimJurorId) {
+  // Observer hub, never the clerk hub: only the clerk's own stream may deliver intents.
+  const reg = await conn.registerObserver("intruder");
   const client = jurorClient({ agentToken: reg.token, baseUrl: relayOpts.baseUrl });
-  const forged = {
-    body: { caseId, round: 0, juror: victimJurorId, commitment: "00".repeat(32) },
-    sig: null,
-    signer: null,
-  };
   const ch = channelName(caseId, "commit", 0);
   await client.channels.join(ch);
-  await client.send(ch, JSON.stringify(forged));
-  log("intruder posted a forged unsigned commit");
+  return {
+    async post() {
+      const forged = { body: { caseId, round: 0, juror: victimJurorId, commitment: "00".repeat(32) }, sig: null, signer: null };
+      await client.send(ch, JSON.stringify(forged));
+      log("intruder posted a forged unsigned commit in the commit/0 window");
+    },
+  };
 }

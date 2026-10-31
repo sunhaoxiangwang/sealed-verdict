@@ -86,7 +86,10 @@ Prerequisites: Node 22 or newer, pnpm, Bun 1.4.2 or newer with
 
 Output is the same `apps/actors/out/<caseId>.json` bundle as the in-memory
 runner, plus `<caseId>.relay.json` mapping every admitted ledger sequence
-number to its Relay message id.
+number to its Relay message id. Both are staged under `out/.staging/<caseId>`
+and exposed only after the certificate verifies natively and Terse has
+stored it; if either step fails the run exits non-zero and removes this
+case's staged and final files, and nothing is published on the cert channel.
 
 Juror interface for the jurors team: connect with your own agent token
 (`createAgentClient({ agentToken, baseUrl })` from `@agent-relay/sdk/messaging`),
@@ -102,10 +105,12 @@ tags them.
 
 ## Environment variables
 
-WP1 runs entirely in memory and needs no environment variables. The names
-reserved for later packages are listed in `.env.example`:
-`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `TERSE_API_KEY`, `TERSE_BASE_URL`,
-`RELAY_API_KEY`, `RELAY_BASE_URL`, `RELAY_CHANNEL_PREFIX`, `SUPABASE_URL`,
+The in-memory runner needs no environment variables. Live mode reads
+`RELAY_WORKSPACE_KEY` and `RELAY_BASE_URL` (default `http://127.0.0.1:8787`)
+for Agent Relay, and `TERSE_ACTOR_URL` (default
+`http://127.0.0.1:7100/v1/projects/local/actors`) and `TERSE_API_KEY` (hosted
+only) for Terse. Names reserved for teammate packages are also listed in
+`.env.example`: `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `SUPABASE_URL`,
 `SUPABASE_ANON_KEY`. Copy the file to `.env` for local values; `.env` is
 gitignored and must never be committed.
 
