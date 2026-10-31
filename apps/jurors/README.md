@@ -1,5 +1,7 @@
 # apps/jurors: the jury on Agent Relay (C2 to C5)
 
+Merging or picking this up? Start with [HANDOFF.md](HANDOFF.md).
+
 Owner: Rikin. Four juror agents deliberate on a per-case Agent Relay channel. One `condition` flag switches the protocol:
 
 | Condition | Round 1 | Identities | Personas / models | Evidence and votes |
