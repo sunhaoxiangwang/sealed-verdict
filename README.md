@@ -62,6 +62,44 @@ through `C5`, an optional `--case-id`, and writes
 `apps/actors/out/<caseId>.json`. The directory is gitignored. The command
 exits 1 if the certificate it just produced does not verify.
 
+## Live mode: Agent Relay transport and Terse state
+
+`apps/actors/bridge` runs one live case: the Rust `clerk_daemon` holds every
+key and makes every protocol decision; a thin Node bridge moves envelopes over
+Agent Relay channels and persists each entry and phase transition to a Terse
+durable actor before announcing it. Both services run locally in WP2; hosted
+deployment is a later, separately reported step. See docs/core.md for the
+command contract, channel names, and trust assumptions.
+
+Prerequisites: Node 22 or newer, pnpm, Bun 1.4.2 or newer with
+`terse-cli` 0.14.9 (`bunx terse-cli@0.14.9 install`), and a built daemon
+(`cargo build --manifest-path apps/actors/Cargo.toml`).
+
+| Step | Command |
+| --- | --- |
+| Local Relay engine (Node 26 needs a newer SQLite binding) | `mkdir -p ~/relay-engine && cd ~/relay-engine && npm init -y >/dev/null && npm pkg set overrides.better-sqlite3=13.0.3 && npm i @relaycast/engine@12.3.0 && node node_modules/@relaycast/engine/dist/bin/serve.js --db ./relaycast.db --port 8787` |
+| Workspace key (operator step; paste into `.env`, never commit) | `cd apps/actors/bridge && node -e 'import("./src/relay.js").then(async (m) => console.log((await m.createWorkspace({ name: "sealed-verdict" })).workspaceKey))'` |
+| Local Terse runtime | `cd apps/actors/bridge/terse && terse actor dev --port 7100` |
+| Live scripted case | `cd apps/actors/bridge && RELAY_WORKSPACE_KEY=... node src/run-live.js --script 3-1 --condition C3` (also `2-2`, `forged`; `--timeout-ms`, `--case-id`) |
+| Live case with teammate jurors | `node src/run-live.js --live --case-id <id>`; juror tokens are written to `apps/actors/bridge/.tokens/<id>.json` (gitignored) for a private handoff |
+| Bridge tests | `pnpm --filter @sealed-verdict/bridge test:relay`, `test:terse`, `node --test test/daemon-client.test.mjs`, and the live acceptance `node --test --test-force-exit --test-timeout=120000 test/live-e2e.mjs` |
+
+Output is the same `apps/actors/out/<caseId>.json` bundle as the in-memory
+runner, plus `<caseId>.relay.json` mapping every admitted ledger sequence
+number to its Relay message id.
+
+Juror interface for the jurors team: connect with your own agent token
+(`createAgentClient({ agentToken, baseUrl })` from `@agent-relay/sdk/messaging`),
+read phase changes on `sv-<caseId>-phase` and evidence on
+`sv-<caseId>-evidence`, and send signing intents as a DM to the clerk agent
+`sv-<caseId>-clerk`: `{ "kind": "commit", "round": 0, "vote": "ans2",
+"confidence": 70 }`, then `{ "kind": "reveal", "round": 0 }` once the reveal
+window opens, and `{ "kind": "argument", "round": 0, "text": "...",
+"evidenceIds": ["ev-0"] }` during deliberation. The bridge replies by DM with
+`{ ok, kind, round, messageId }` or `{ ok: false, error }`. Byzantine jurors
+may post raw envelopes directly to the public channels; the Clerk rejects or
+tags them.
+
 ## Environment variables
 
 WP1 runs entirely in memory and needs no environment variables. The names
