@@ -33,7 +33,7 @@ npm run quickstart          # live Relay check: ends with "FOUR AGENTS TALKING: 
 | Four agents talking on a Relay channel | Tested live, PASS |
 | Channel permission probe | Tested live. **There are none**, see section 5. |
 | C5 end to end: commit-reveal, signatures, UNATTESTED tags, quorum, certificate | Tested live on 3 items (base, byz, forged), all completed, with scripted jurors |
-| C2 end to end | Tested live on 3 items. 2/3 passed on the first run; the failure was a hosted-relay 429, which now retries |
+| C2 end to end | Tested live on 3 items, 3/3. The first run lost one item to a hosted-relay 429; re-running resumed and finished it. |
 | C3, C4 | Same code paths as C2/C5, gated by flags. Not run separately yet. |
 | LLM juror calls (`src/llm.ts`) | **Not run yet.** No OpenAI key was available. Run `--limit 5` first and check the verdict lines. |
 
