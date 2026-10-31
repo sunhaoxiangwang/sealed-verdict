@@ -21,6 +21,7 @@ export default function Certificate() {
   if (!cert) {
     return (
       <div className="page cert-page">
+        <p className="kicker">The sealed writ</p>
         <h1>No verdict yet</h1>
         <p className="muted">The tribunal has not issued a certificate. Load the signed-protocol case and watch it deliberate.</p>
         <button
@@ -43,10 +44,12 @@ export default function Certificate() {
 
   return (
     <div className="page cert-page">
+      <p className="kicker">The sealed writ</p>
       <article className={`cert ${rows && broken ? "cert-broken" : ""}`} aria-label="Verdict certificate">
         <div className={`seal ${rows && broken ? "seal-cracked" : ""}`} aria-hidden="true">
           <span>SV</span>
         </div>
+        <span className="cert-ribbon" aria-hidden="true" />
         <h2 className="cert-title">Verdict Certificate</h2>
         <dl className="cert-grid">
           <dt>Case</dt>
@@ -65,7 +68,7 @@ export default function Certificate() {
           {evRows.map((e) => (
             <li key={e.id}>
               <span className="mono">{e.id}</span>
-              <span className={`cbadge ${e.ok ? "ok" : "bad"}`}>{e.ok ? "VERIFIED" : "FORGED"}</span>
+              <span className={`stamp stamp-sm cbadge ${e.ok ? "stamp-green ok" : "stamp-red bad"}`} style={{ ["--rot" as string]: e.ok ? "-5deg" : "-7deg" }}>{e.ok ? "VERIFIED" : "FORGED"}</span>
               {!e.ok && <span className="cert-note">excluded</span>}
             </li>
           ))}
@@ -84,7 +87,7 @@ export default function Certificate() {
 
       <div className="cert-actions">
         <button onClick={() => setRows(auditTranscript(useTribunal.getState()))}>Verify</button>
-        <button onClick={() => tamperTranscript()}>Tamper transcript</button>
+        <button className="writ" onClick={() => tamperTranscript()}>Tamper transcript</button>
         <button
           onClick={() => {
             load("C5");
@@ -98,22 +101,23 @@ export default function Certificate() {
       </div>
 
       {rows && (
-        <section className="audit" aria-live="polite">
+        <section className="audit" aria-live="polite" aria-label="Ledger of checks">
+          <h3 className="audit-title">Ledger of checks</h3>
           <ul className="audit-list">
             {rows.map((r) => (
               <li key={r.label} className={r.ok ? "audit-ok" : "audit-bad"}>
-                <span className="audit-mark">{r.ok ? "PASS" : "FAIL"}</span>
+                <span className="audit-mark"><span className={`stamp stamp-sm ${r.ok ? "stamp-green" : "stamp-red"}`} style={{ ["--rot" as string]: r.ok ? "-6deg" : "-9deg" }}>{r.ok ? "PASS" : "FAIL"}</span></span>
                 <strong>{r.label}</strong>
                 <span className="audit-detail">{r.detail}</span>
               </li>
             ))}
           </ul>
-          <div className={`audit-banner ${broken ? "audit-banner-bad" : "audit-banner-ok"}`}>{broken ? "SEAL BROKEN" : "SEAL INTACT"}</div>
+          <div className={`audit-banner ${broken ? "audit-banner-bad" : "audit-banner-ok"}`}><span className={`stamp ${broken ? "stamp-red" : "stamp-green"}`} style={{ ["--rot" as string]: "-7deg" }}>{broken ? "SEAL BROKEN" : "SEAL INTACT"}</span></div>
         </section>
       )}
 
       <details className="cert-json">
-        <summary>Raw certificate JSON</summary>
+        <summary>Clerk&rsquo;s copy (raw certificate JSON)</summary>
         <pre className="mono">{JSON.stringify(certSigned ?? cert, null, 2)}</pre>
       </details>
     </div>

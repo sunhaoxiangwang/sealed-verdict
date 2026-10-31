@@ -5,8 +5,31 @@ const SIGNED = new Set<FeedItem["kind"]>(["evidence", "commit", "reveal", "argum
 
 function SigBadge({ item }: { item: FeedItem }) {
   if (!SIGNED.has(item.kind)) return null;
-  if (item.unattested) return <span className="badge unattested">UNATTESTED</span>;
-  return item.verified ? <span className="badge verified">verified</span> : <span className="badge forged">forged</span>;
+  if (item.unattested) {
+    return (
+      <span className="unattested stamp stamp-red stamp-round stamp-void">
+        <span>UNATTESTED</span>
+      </span>
+    );
+  }
+  return item.verified ? (
+    <span className="verified stamp stamp-green stamp-round">
+      <span>verified</span>
+    </span>
+  ) : (
+    <span className="forged stamp stamp-red stamp-round stamp-void">
+      <span>forged</span>
+    </span>
+  );
+}
+
+function headerLine(item: FeedItem): string {
+  if (item.kind === "evidence") {
+    const source = item.text.split(/\s+/)[0] ?? "";
+    return `Exhibit ${item.evidenceIds?.[0] ?? ""} · ${source}`.trim();
+  }
+  if (item.juror) return `Juror ${item.juror} · ${item.kind}`;
+  return item.kind;
 }
 
 export default function TranscriptFeed() {
@@ -22,10 +45,10 @@ export default function TranscriptFeed() {
       {feed.length === 0 && <p className="muted">No messages yet.</p>}
       {feed.map((item) => (
         <div key={item.id} className={`feed-item feed-${item.kind}`}>
+          <span className="feed-string" aria-hidden="true" />
           <div className="feed-head">
-            {item.juror && <span className="juror-name">{item.juror}</span>}
+            <span className="feed-kind">{headerLine(item)}</span>
             <SigBadge item={item} />
-            <span className="feed-kind">{item.kind}</span>
           </div>
           <div className="feed-text">{item.text}</div>
         </div>

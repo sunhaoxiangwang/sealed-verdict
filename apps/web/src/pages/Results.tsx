@@ -85,19 +85,15 @@ export default function Results() {
   return (
     <div className="results">
       <header className="results-head">
+        <p className="kicker">The Coroner&rsquo;s Findings</p>
         <h1>Bias ablation ladder</h1>
-        {measured ? (
-          <span className="status-pill measured">{`MEASURED · n=${n.bbq}+${n.truthfulqa}`}</span>
-        ) : (
-          <span className="status-pill illustrative">ILLUSTRATIVE — placeholder numbers</span>
-        )}
       </header>
 
       <p className="results-lede">
         Multi-agent debate makes LLM bias worse (C2 &gt; C0). The protocol on Agent Relay brings it below baseline (C5).
       </p>
 
-      <div className="stat-grid">
+      <div className="stat-grid" role="group" aria-label="Key figures">
         <div className="stat">
           <div className="stat-label">Bias reduction, C0 → C5</div>
           <div className="stat-value good">{reduction === null ? "—" : `${Math.round(reduction * 100)}%`}</div>
@@ -112,8 +108,15 @@ export default function Results() {
         </div>
       </div>
 
-      <section className="panel">
+      <section className="panel panel-stamped">
         <h2>Bias score by condition</h2>
+        <div className="stamp-slip">
+          {measured ? (
+            <span className="stamp stamp-green status-pill measured">{`Entered into record · n=${n.bbq}+${n.truthfulqa}`}</span>
+          ) : (
+            <span className="stamp stamp-red status-pill illustrative">Specimen — not measured</span>
+          )}
+        </div>
         <LadderChart conditions={conditions} />
         <p className="caption">BBQ ambiguous bias score; 0 is unbiased, lower is better. Bars show bootstrap 95% CI.</p>
       </section>

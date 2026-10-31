@@ -1,27 +1,49 @@
 :root {
+  /* ground and light */
   --bg: #0b0a0d;
-  --bg-2: #141218;
-  --panel: rgba(20, 18, 24, 0.72);
-  --stone: #1c1a21;
-  --oak: #4a2e1b;
-  --oak-2: #6b4426;
-  --brass: #c9a24a;
-  --brass-2: #8a6a2a;
+  --bg-2: #15110f;
+  --plate: #15110f;
+  --panel: #15110f;
+  --stone: #1d1814;
+  --oak: #3a2d20;
+  --oak-2: #5a4430;
+  --candle: #ff8c3a;
+  /* paper and ink */
+  --manila: #d9c48f;
   --parchment: #e8dcc0;
   --parchment-2: #cdbd98;
+  --aged: #b89f62;
+  --aged-edge: #8a7340;
+  --carbon: #e6e3da;
   --ink: #f1ead9;
-  --ink-dim: #a69a86;
+  --ink-dim: #b0a48e;
+  --ink-black: #15110f;
+  --ink-paper-dim: #5b4a30;
+  /* hardware */
+  --brass: #c9a24a;
+  --brass-2: #8a6a2a;
+  /* stamps */
   --wax: #9b1b1b;
   --wax-2: #c62828;
+  --stamp-red: #9b1b1b;
+  --stamp-green: #2a7344;
+  --stamp-amber: #8f6a0a;
   --verified: #5ac47c;
   --forged: #e04b3a;
   --uncertain: #d7a73b;
   --true: #5ac47c;
   --false: #e04b3a;
   --byzantine: #7fcf5a;
-  --radius: 10px;
-  --font-display: 'Cormorant Garamond', serif;
-  --font-mono: 'JetBrains Mono', monospace;
-  --font-body: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --radius: 3px;
+  /* type */
+  --font-blackletter: 'Pirata One', 'Libre Caslon Text', serif;
+  --font-display: 'Libre Caslon Text', Georgia, 'Times New Roman', serif;
+  --font-body: 'Libre Caslon Text', Georgia, 'Times New Roman', serif;
+  --font-type: 'Special Elite', 'Courier New', monospace;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --fs-1: 11px; --fs-2: 13px; --fs-3: 15px; --fs-4: 17px; --fs-5: 22px; --fs-6: 30px; --fs-7: 44px;
+  --ease-out: cubic-bezier(0.2, 0.9, 0.3, 1);
+  /* paper grain: inline SVG feTurbulence at ~5% */
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .22 0 0 0 0 .15 0 0 0 0 .07 0 0 0 1.1 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.1'/%3E%3C/svg%3E");
   color-scheme: dark;
 }

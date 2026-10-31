@@ -81,9 +81,9 @@ export default function DemoControls() {
           </button>
         ))}
       </div>
-      <button disabled={live} onClick={() => injectForgedEvidence()}>Inject forged evidence</button>
-      <button disabled={live || !target} onClick={() => target && makeByzantine(target)}>Make juror Byzantine</button>
-      <button onClick={() => tamperTranscript()}>Tamper transcript</button>
+      <button className="writ" disabled={live} onClick={() => injectForgedEvidence()}>Forge evidence</button>
+      <button className="writ" disabled={live || !target} onClick={() => target && makeByzantine(target)}>Turn juror Byzantine</button>
+      <button className="writ" onClick={() => tamperTranscript()}>Tamper transcript</button>
       {live && (
         <input
           className="case-input"
@@ -105,7 +105,14 @@ export default function DemoControls() {
           title={badgeTitle}
           onClick={() => (live ? goMock() : void goLive())}
         >
-          {live ? "LIVE" : "MOCK"}
+          <span className="toggle-track" aria-hidden="true"><span className="toggle-knob" /></span>
+          <svg className="lantern" width="12" height="18" viewBox="0 0 12 18" aria-hidden="true">
+            <path d="M4 3.5V2.2a2 2 0 0 1 4 0v1.3" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" />
+            <path className="lamp" d="M3 4h6l1.2 9.5H1.8z" strokeWidth="1" strokeLinejoin="round" />
+            <path className="flame" d="M6 6.2c1.4 1.6 1.8 2.6 1.8 3.6A1.8 1.8 0 0 1 4.2 9.8C4.2 8.8 4.6 7.8 6 6.2z" />
+            <path d="M1.5 14.2h9v1.6h-9z" fill="currentColor" opacity=".7" />
+          </svg>
+          <span>{live ? "LIVE" : "MOCK"}</span>
         </button>
       </span>
     </div>

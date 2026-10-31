@@ -28,7 +28,7 @@ function Chip({ j, cond }: { j: Juror; cond: "C2" | "C5" }) {
       <span className="rchip-name">{j.pseudonym}</span>
       <span className="rchip-vote">{v}</span>
       <span className="rchip-state">{chipState(j, cond)}</span>
-      {j.flipped && <span className="rchip-flip">flipped</span>}
+      {j.flipped && <span className="rchip-flip">recanted</span>}
     </div>
   );
 }
@@ -68,7 +68,16 @@ function Column({ col }: { col: (typeof COLUMNS)[number] }) {
       <div className="rverdict">
         {cert ? <span className="rverdict-line">Verdict: {cert.verdict} ({cert.quorum})</span> : <span className="muted">No verdict yet</span>}
       </div>
-      {banner && <div className={`rbanner rbanner-${col.cond}`}>{banner}</div>}
+      {banner && (
+        <div className={`rbanner rbanner-${col.cond}`}>
+          <span className="rbanner-text">{banner}</span>
+          {col.cond === "C2" ? (
+            <span className="stamp stamp-red" style={{ ["--rot" as string]: "-8deg" }}>Tainted by herding</span>
+          ) : (
+            <span className="stamp stamp-green" style={{ ["--rot" as string]: "-6deg" }}>Held</span>
+          )}
+        </div>
+      )}
     </section>
   );
 }
@@ -92,6 +101,7 @@ export default function Replay() {
 
   return (
     <div className="page replay">
+      <p className="kicker">Two inquests, one body of evidence</p>
       <h1>Same case, two protocols</h1>
       <div className="demo-controls">
         <button onClick={() => (playing ? both((p) => p.pause()) : both((p) => p.play()))}>{playing ? "Pause" : "Play"}</button>
