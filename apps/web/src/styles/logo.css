@@ -1,0 +1,36 @@
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.logo-mark {
+  flex: none;
+  display: block;
+  overflow: visible;
+  shape-rendering: geometricPrecision;
+}
+.logo-seal {
+  transition: filter 150ms ease;
+}
+.logo:hover .logo-seal,
+a:hover > .logo .logo-seal,
+a:focus-visible > .logo .logo-seal {
+  filter: brightness(1.15) saturate(1.08);
+}
+.logo-word {
+  font-family: var(--font-wordmark, Georgia, serif);
+  font-weight: 400;
+  font-style: normal;
+  font-size: 20px;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: #f3efe8;
+  white-space: nowrap;
+}
+.logo-word em {
+  font-style: italic;
+}
+@media (prefers-reduced-motion: reduce) {
+  .logo-seal { transition: none; }
+}

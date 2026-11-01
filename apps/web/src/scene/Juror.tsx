@@ -14,7 +14,15 @@ const PERSONA_MODEL: Record<string, string> = {
   "devil's advocate": "/models/juror_advocate.glb",
   statistician: "/models/juror_statistician.glb",
 };
-const modelFor = (persona?: string) => PERSONA_MODEL[(persona ?? "").toLowerCase()] ?? "/models/wraith.glb";
+/** Each seat has a fixed character, so the right person stands there even before a case is loaded. */
+const SEATS = [
+  { model: "/models/juror_skeptic.glb", pseudonym: "wraith-3c1", persona: "skeptic" },
+  { model: "/models/juror_expert.glb", pseudonym: "specter-7a9", persona: "domain expert" },
+  { model: "/models/juror_advocate.glb", pseudonym: "shade-b24", persona: "devil's advocate" },
+  { model: "/models/juror_statistician.glb", pseudonym: "revenant-e10", persona: "statistician" },
+];
+const norm = (s?: string) => (s ?? "").toLowerCase().replace(/[\u2018\u2019]/g, "'").trim();
+const modelFor = (persona: string | undefined, seat: number) => PERSONA_MODEL[norm(persona)] ?? SEATS[seat % SEATS.length].model;
 
 function WraithModel({ url }: { url: string }) {
   const { scene } = useGLTF(url);
@@ -142,7 +150,7 @@ export default function Juror({ index }: { index: number }) {
       <group position={[L.x, 0, L.z]} rotation-y={rotY}>
         <group ref={bob}>
           <Safe fallback={<WraithFallback />}>
-            <WraithModel url={modelFor(data?.persona)} />
+            <WraithModel url={modelFor(data?.persona, index)} />
           </Safe>
           <group position={[0, 2.5, 0]}>
             <group ref={sealed} visible={false}>
@@ -179,10 +187,10 @@ export default function Juror({ index }: { index: number }) {
             <meshBasicMaterial color="#5ac47c" toneMapped={false} />
           </mesh>
           <Text font="/fonts/JetBrainsMono-Medium.ttf" fontSize={0.054} color="#e8dcc0" anchorX="left" anchorY="middle" position={[-0.24, 0.022, 0.001]}>
-            {data?.pseudonym ?? "empty seat"}
+            {data?.pseudonym ?? SEATS[index % SEATS.length].pseudonym}
           </Text>
           <Text font="/fonts/JetBrainsMono-Medium.ttf" fontSize={0.038} color="#a69a86" anchorX="left" anchorY="middle" position={[-0.24, -0.038, 0.001]}>
-            {data?.persona ?? ""}
+            {data?.persona ?? SEATS[index % SEATS.length].persona}
           </Text>
         </group>
       </group>

@@ -1,8 +1,10 @@
 import { useMemo, useRef, type ReactNode } from "react";
+import type { Conclusion } from "../protocol/types";
 import { useTribunal, type FeedItem, type Juror } from "../store/tribunal";
 import Avatar, { hueIndex } from "./Avatar";
 import { IconFileText, IconShield } from "./icons";
 import { useStickToBottom } from "./useStickToBottom";
+import { VerdictPill, verdictText } from "./VerdictPanel";
 
 const SIGNED = new Set<FeedItem["kind"]>(["evidence", "commit", "reveal", "argument", "verdict"]);
 
@@ -61,11 +63,13 @@ export function LedgerEntry({
   jurors,
   speaking = false,
   dense = false,
+  conclusion,
 }: {
   item: FeedItem;
   jurors: ReadonlyArray<Juror>;
   speaking?: boolean;
   dense?: boolean;
+  conclusion?: Conclusion;
 }) {
   if (item.kind === "system" || item.kind === "phase") {
     const text = item.kind === "phase" ? `Phase · ${item.text.replace(/^phase:\s*/i, "")}` : item.text;
@@ -99,6 +103,31 @@ export function LedgerEntry({
           </div>
           {ev && <div className="entry-source mono">{ev.source}</div>}
           <div className="entry-body">{ev ? ev.excerpt : item.text}</div>
+        </div>
+      </article>
+    );
+  }
+
+  if (item.kind === "conclusion") {
+    return (
+      <article className={`${cls} entry-conclusion${conclusion ? ` tone-${conclusion.verdict}` : ""}`}>
+        <span className="glyph-disc is-conclusion">
+          <IconShield size={dense ? 12 : 14} />
+        </span>
+        <div>
+          <div className="entry-head">
+            <span className="entry-name">Conclusion</span>
+            {!item.verified && <span className="pill pill-forged forged">unsigned</span>}
+            {conclusion && <VerdictPill vote={conclusion.verdict} label={verdictText(conclusion)} />}
+          </div>
+          <div className="entry-body entry-conclusion-text">{item.text}</div>
+          {conclusion && (
+            <div className="entry-meta">
+              <span className="entry-conclusion-agree">
+                {conclusion.agree} of {conclusion.total || 4} agreed
+              </span>
+            </div>
+          )}
         </div>
       </article>
     );
@@ -160,6 +189,7 @@ export default function TranscriptFeed() {
   const feed = useTribunal((s) => s.feed);
   const jurors = useTribunal((s) => s.jurors);
   const source = useTribunal((s) => s.source);
+  const conclusion = useTribunal((s) => s.conclusion);
   const listRef = useRef<HTMLDivElement>(null);
   useStickToBottom(listRef, feed.length);
 
@@ -188,10 +218,10 @@ export default function TranscriptFeed() {
       </header>
       <div ref={listRef} className="ledger-list" role="log" aria-label="Transcript entries" tabIndex={0}>
         {feed.length === 0 && (
-          <p className="ledger-empty">{source === "live" ? "Waiting for live events." : "No messages yet. Press Play to start the case."}</p>
+          <p className="ledger-empty">{source === "live" ? "Waiting for live events." : "The jurors are taking their seats. Press Play if the case is paused."}</p>
         )}
         {feed.map((item) => (
-          <LedgerEntry key={item.id} item={item} jurors={jurors} speaking={speaking.has(item.id)} />
+          <LedgerEntry key={item.id} item={item} jurors={jurors} speaking={speaking.has(item.id)} conclusion={item.kind === "conclusion" ? conclusion : undefined} />
         ))}
       </div>
     </section>

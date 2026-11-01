@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { Argument, Condition, Evidence, Phase, Signed, TribunalEvent, VerdictCert } from "../protocol/types";
+import type { Argument, CaseInput, Condition, Conclusion, Evidence, Phase, Signed, TribunalEvent, VerdictCert } from "../protocol/types";
 import { verify } from "../protocol/crypto";
 
 export type Juror = {
@@ -33,7 +33,10 @@ export type FeedItem = {
   evidenceIds?: string[];
 };
 
+export type TribunalStatus = "empty" | "running" | "done";
+
 export type TribunalState = {
+  status: TribunalStatus;
   caseId: string;
   claim: string;
   condition: Condition;
@@ -47,18 +50,24 @@ export type TribunalState = {
   keys: Record<string, string>;
   chainBroken: boolean;
   source: "mock" | "live";
+  conclusion?: Conclusion;
+  caseInput?: CaseInput;
 };
 
 type TribunalActions = {
   applyEvent: (e: TribunalEvent) => void;
-  setCase: (c: { caseId: string; claim: string; condition: Condition; jurors: Juror[]; keys?: Record<string, string> }) => void;
+  // Starts a case: status "running", conclusion cleared. caseInput is kept when re-loading the same caseId without one.
+  setCase: (c: { caseId: string; claim: string; condition: Condition; jurors: Juror[]; keys?: Record<string, string>; caseInput?: CaseInput }) => void;
   tamper: () => boolean;
   reset: () => void;
+  // Back to the empty state (no case). Keeps source.
+  resetAll: () => void;
   setChainBroken: (b: boolean) => void;
   setSource: (s: "mock" | "live") => void;
 };
 
 const initial: TribunalState = {
+  status: "empty",
   caseId: "",
   claim: "",
   condition: "C5",
@@ -72,6 +81,8 @@ const initial: TribunalState = {
   keys: {},
   chainBroken: false,
   source: "mock",
+  conclusion: undefined,
+  caseInput: undefined,
 };
 
 let seq = 0;
@@ -108,7 +119,13 @@ export function createTribunalStore() {
         case "evidence": {
           const b = e.msg.body;
           const ok = check(e.msg, e.verified);
+          // Evidence rejected after the opinion was written is still listed as not counted.
+          const conclusion =
+            !ok && s.conclusion && !s.conclusion.excluded.some((x) => x.id === b.id)
+              ? { ...s.conclusion, excluded: [...s.conclusion.excluded, { id: b.id, why: "no valid oracle signature; arrived after the verdict" }] }
+              : s.conclusion;
           return {
+            conclusion,
             evidence: [...s.evidence, b],
             messages: [...s.messages, { kind: "evidence", msg: e.msg, verified: ok }],
             feed: [...s.feed, mkItem("evidence", `${b.kind} ${b.source}: ${b.excerpt}`, { verified: ok, evidenceIds: [b.id] })],
@@ -151,6 +168,22 @@ export function createTribunalStore() {
             feed: [...s.feed, mkItem("verdict", `verdict: ${c.verdict} (quorum ${c.quorum})`, { verified: ok })],
           };
         }
+        case "conclusion": {
+          const c = e.msg.body;
+          const ok = check(e.msg, e.verified);
+          // Any rejected evidence in the transcript is listed as not counted, even if the opinion omitted it.
+          const excluded = [...(c.excluded ?? [])];
+          for (const m of s.messages) {
+            if (m.kind !== "evidence" || m.verified) continue;
+            const id = (m.msg.body as { id: string }).id;
+            if (!excluded.some((x) => x.id === id)) excluded.push({ id, why: "no valid oracle signature" });
+          }
+          return {
+            conclusion: { ...c, excluded },
+            status: "done",
+            feed: [...s.feed, mkItem("conclusion", c.headline, { verified: ok, evidenceIds: [...new Set((c.reasons ?? []).flatMap((r) => r.evidenceIds ?? []))] })],
+          };
+        }
         case "phase":
           return { phase: e.msg.phase, feed: [...s.feed, mkItem("phase", `phase: ${e.msg.phase}`)] };
         case "system":
@@ -164,8 +197,21 @@ export function createTribunalStore() {
     }
   },
 
-  setCase: ({ caseId, claim, condition, jurors, keys }) =>
-    set({ ...initial, caseId, claim, condition, jurors, keys: keys ?? {}, chainBroken: false, source: get().source }),
+  setCase: ({ caseId, claim, condition, jurors, keys, caseInput }) => {
+    const prev = get();
+    set({
+      ...initial,
+      status: "running",
+      caseId,
+      claim,
+      condition,
+      jurors,
+      keys: keys ?? {},
+      chainBroken: false,
+      source: prev.source,
+      caseInput: caseInput ?? (prev.caseId === caseId ? prev.caseInput : undefined),
+    });
+  },
 
   // Mutates one stored Argument's text so the signature and hash chain genuinely fail.
   tamper: () => {
@@ -184,6 +230,8 @@ export function createTribunalStore() {
   },
 
   reset: () => set({ ...initial, source: get().source }),
+
+  resetAll: () => set({ ...initial, source: get().source }),
 
   setChainBroken: (b) => set({ chainBroken: b }),
 

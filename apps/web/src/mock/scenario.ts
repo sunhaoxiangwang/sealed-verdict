@@ -114,7 +114,7 @@ export const scenarioC2: Step[] = build(C2_STANCES, () => [
   argument(27000, "shade-b24", 2, "Correction: a deploy is a human decision too. The engineer is the most plausible cause. I was too quick to say false.", [], "h4"),
   argument(31000, "wraith-3c1", 2, "Four voices now converge on the engineer. Without a source, I am not going to be the one who disagrees.", [], "h5"),
   phase(36000, "verdict"),
-  verdict(38000, { verdict: "the engineer", quorum: "3/4", transcriptRoot: "", evidenceIds: [], voterSigs: [] }),
+  verdict(38000, { verdict: "the engineer", quorum: "4/4", transcriptRoot: "", evidenceIds: [], voterSigs: [] }),
   sys(44000, "Certificate issued. No commit-reveal was used, so the votes were not blind.", "warn"),
 ]);
 

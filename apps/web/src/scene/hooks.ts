@@ -3,6 +3,9 @@ import { Color, MathUtils, type Mesh, type MeshStandardMaterial, type Object3D }
 /** Shared mutable FX channel (read in useFrame; never triggers React renders). */
 export const fx = { pulseAt: -1e9 };
 
+/** `?lite=1` drops reflections, shadows, post-processing and sparkles: for weak laptops and headless checks. */
+export const LITE = typeof location !== "undefined" && new URLSearchParams(location.search).get("lite") === "1";
+
 export const damp = MathUtils.damp;
 export const clamp = MathUtils.clamp;
 

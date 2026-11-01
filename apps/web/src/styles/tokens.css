@@ -70,7 +70,9 @@
 
   /* type */
   --font-ui: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
-  --font-display: "Instrument Serif", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --font-display: "Redaction 35", "Redaction 20", Georgia, "Times New Roman", serif;
+  --font-wordmark: "Redaction 20", "Redaction 35", Georgia, serif;
+  --font-stamp: "Redaction 50", "Redaction 35", Georgia, serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
   /* motion */

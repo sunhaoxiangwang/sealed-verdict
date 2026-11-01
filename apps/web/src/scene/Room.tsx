@@ -3,7 +3,7 @@ import { MeshReflectorMaterial, Sparkles, useGLTF, useTexture } from "@react-thr
 import { RepeatWrapping, type Mesh, type MeshStandardMaterial, type Texture } from "three";
 import { clone } from "three/examples/jsm/utils/SkeletonUtils.js";
 import Safe from "./Safe";
-import { TABLE_POS, TABLE_TOP } from "./hooks";
+import { LITE, TABLE_POS, TABLE_TOP } from "./hooks";
 
 const STONE = "#1c1a21";
 
@@ -53,6 +53,7 @@ function tile(t: Texture, n: number) {
 }
 
 function ParquetFloor() {
+  if (LITE) return <LiteFloor />;
   const [map, roughnessMap, normalMap] = useTexture([
     "/textures/parquet/diff.jpg",
     "/textures/parquet/rough.jpg",
@@ -79,7 +80,19 @@ function ParquetFloor() {
   );
 }
 
+function LiteFloor() {
+  const [map] = useTexture(["/textures/parquet/diff.jpg"]);
+  useMemo(() => tile(map, 7), [map]);
+  return (
+    <mesh rotation-x={-Math.PI / 2}>
+      <planeGeometry args={[14, 14]} />
+      <meshStandardMaterial map={map} color="#6b5236" roughness={0.75} />
+    </mesh>
+  );
+}
+
 function PlainFloor() {
+  if (LITE) return <mesh rotation-x={-Math.PI / 2}><planeGeometry args={[14, 14]} /><meshStandardMaterial color="#141218" roughness={0.9} /></mesh>;
   return (
     <mesh rotation-x={-Math.PI / 2} receiveShadow>
       <planeGeometry args={[14, 14]} />
@@ -104,7 +117,7 @@ export default function Room() {
         <cylinderGeometry args={[0.6, 0.6, TABLE_TOP, 32]} />
         <meshStandardMaterial color="#2a1c12" roughness={0.6} />
       </mesh>
-      <Sparkles count={120} scale={[8, 3, 8]} size={1.5} speed={0.25} color="#ffb36b" opacity={0.5} position={[0, 1.5, -1.5]} />
+      {!LITE && <Sparkles count={120} scale={[8, 3, 8]} size={1.5} speed={0.25} color="#ffb36b" opacity={0.5} position={[0, 1.5, -1.5]} />}
     </group>
   );
 }

@@ -1,5 +1,5 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import type { Condition, Phase, TribunalEvent } from "../protocol/types";
+import type { Conclusion, Condition, Phase, TribunalEvent, Verdict } from "../protocol/types";
 import { useTribunal, type Juror, type TribunalStore } from "../store/tribunal";
 
 // Live data source. Contract: see src/contracts.md.
@@ -37,6 +37,48 @@ export function getClient(): SupabaseClient | null {
 
 const unknownSeen = new Set<string>();
 
+const DEFAULT_QUORUM_RULE = "3 of 4 sealed votes are needed. The rule tolerates one faulty or dishonest juror.";
+
+// Fills defaults on a live conclusion body so the UI can always render it (see contracts.md, "conclusion").
+export function normalizeConclusion(raw: any, fallbackCaseId?: unknown): Conclusion {
+  const body = raw && typeof raw === "object" ? raw : {};
+  const verdict: Verdict = STANCES.includes(body.verdict) ? body.verdict : "uncertain";
+  const votes: Conclusion["votes"] = Array.isArray(body.votes)
+    ? body.votes.map((v: any) => ({
+        juror: String(v?.juror ?? ""),
+        persona: String(v?.persona ?? "juror"),
+        vote: STANCES.includes(v?.vote) ? v.vote : "uncertain",
+        confidence: Number.isFinite(Number(v?.confidence)) ? Number(v.confidence) : 0,
+      }))
+    : [];
+  const q = /^(\d+)\s*\/\s*(\d+)$/.exec(String(body.quorum ?? ""));
+  const total = Number.isFinite(Number(body.total)) && Number(body.total) > 0 ? Number(body.total) : votes.length || (q ? Number(q[2]) : 4);
+  const agree = Number.isFinite(Number(body.agree)) ? Number(body.agree) : votes.length ? votes.filter((v) => v.vote === verdict).length : q ? Number(q[1]) : 0;
+  const f = Math.floor((total - 1) / 3); // Byzantine faults tolerated
+  const needed = Number.isFinite(Number(body.needed)) && Number(body.needed) > 0 ? Number(body.needed) : 2 * f + 1;
+  return {
+    ...body,
+    caseId: String(body.caseId ?? fallbackCaseId ?? ""),
+    claim: String(body.claim ?? ""),
+    verdict,
+    headline: String(body.headline ?? ""),
+    summary: String(body.summary ?? ""),
+    confidence: Number.isFinite(Number(body.confidence)) ? Number(body.confidence) : 0,
+    quorum: String(body.quorum ?? `${agree}/${total}`),
+    why: String(body.why ?? body.summary ?? ""),
+    ...(typeof body.wouldChange === "string" && body.wouldChange ? { wouldChange: body.wouldChange } : {}),
+    votes,
+    agree,
+    total,
+    needed,
+    quorumRule: typeof body.quorumRule === "string" && body.quorumRule ? body.quorumRule : total === 4 ? DEFAULT_QUORUM_RULE : `${needed} of ${total} sealed votes are needed. The rule tolerates ${f} faulty or dishonest ${f === 1 ? "juror" : "jurors"}.`,
+    reasons: Array.isArray(body.reasons) ? body.reasons : [],
+    dissent: Array.isArray(body.dissent) ? body.dissent : [],
+    excluded: Array.isArray(body.excluded) ? body.excluded : [],
+    simulated: Boolean(body.simulated),
+  };
+}
+
 // Maps one events row to a TribunalEvent. Unknown types return null (logged once).
 export function rowToEvent(row: EventRow): TribunalEvent | null {
   const p = row.payload ?? {};
@@ -50,6 +92,11 @@ export function rowToEvent(row: EventRow): TribunalEvent | null {
       return { type: "reveal", msg: p, verified };
     case "verdict":
       return { type: "verdict", msg: p, verified };
+    case "conclusion": {
+      // Accepts Signed<Conclusion> or a bare Conclusion body (then marked unsigned).
+      const signedMsg = p && typeof p === "object" && "body" in p ? p : { body: p, sig: "", signer: "unsigned" };
+      return { type: "conclusion", msg: { ...signedMsg, body: normalizeConclusion(signedMsg.body, row.case_id) }, verified };
+    }
     case "argument":
       return {
         type: "argument",
@@ -154,7 +201,8 @@ export function subscribeCase(caseId: string, store: TribunalStore = useTribunal
     )
     .on("broadcast", { event: "tribunal" }, ({ payload }) => {
       const ev = payload as TribunalEvent | undefined;
-      if (ev && typeof ev.type === "string") deliver(undefined, ev);
+      if (ev && ev.type === "conclusion" && ev.msg) deliver(undefined, { ...ev, msg: { ...ev.msg, body: normalizeConclusion(ev.msg.body, ev.msg.body?.caseId ?? caseId) } });
+      else if (ev && typeof ev.type === "string") deliver(undefined, ev);
     })
     .subscribe((status) => {
       if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {

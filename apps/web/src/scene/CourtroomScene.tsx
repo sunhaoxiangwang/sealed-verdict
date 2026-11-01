@@ -12,6 +12,7 @@ import Juror from "./Juror";
 import Seal from "./Seal";
 import EvidenceCards from "./EvidenceCards";
 import Safe from "./Safe";
+import { LITE } from "./hooks";
 
 const Q = new URLSearchParams(typeof location !== "undefined" ? location.search : "");
 const DEBUG_TOP = Q.get("top") === "1";
@@ -39,8 +40,8 @@ export default function CourtroomScene() {
   return (
     <div className="scene-canvas">
       <Canvas
-        shadows="soft"
-        dpr={[1, 1.5]}
+        shadows={LITE ? false : "soft"}
+        dpr={LITE ? 1 : [1, 1.5]}
         camera={{ position: [0, 2.45, 4.7], fov: 42, near: 0.1, far: 60 }}
         gl={{ antialias: false, powerPreference: "high-performance" }}
       >
@@ -59,11 +60,11 @@ export default function CourtroomScene() {
         {!HIDE.has("cards") && <EvidenceCards />}
         {!HIDE.has("seal") && <Seal />}
         <Rig />
-        <EffectComposer multisampling={4}>
+        {!LITE && <EffectComposer multisampling={4}>
           <Bloom luminanceThreshold={0.8} intensity={0.55} mipmapBlur />
           <Vignette offset={0.3} darkness={0.75} />
           <Noise opacity={0.05} />
-        </EffectComposer>
+        </EffectComposer>}
       </Canvas>
     </div>
   );
