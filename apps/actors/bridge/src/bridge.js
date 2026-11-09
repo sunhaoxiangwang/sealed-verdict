@@ -32,7 +32,7 @@ export async function runLiveCase(opts) {
   const {
     caseId, condition, choices, context, jurorIds, timeoutMs,
     relay: relayOpts, terse: terseOpts, outDir, daemonBin,
-    scripted = null, intruder = false, tokensDir = null, hooks = {},
+    scripted = null, intruder = false, tokensDir = null, hooks = {}, signal,
   } = opts;
 
   const conn = await connectBridge({ ...relayOpts, caseId, jurorIds });
@@ -67,6 +67,8 @@ export async function runLiveCase(opts) {
   let finished = null;
   let resolveDone, rejectDone;
   const done = new Promise((res, rej) => { resolveDone = res; rejectDone = rej; });
+  // A setup failure can happen before the main await below.
+  done.catch(() => {});
 
   const daemon = new DaemonClient({
     bin: daemonBin,
@@ -88,9 +90,11 @@ export async function runLiveCase(opts) {
     queue.abort(err);
     rejectDone(err);
   }
+  const onAbort = () => abort(new Error("case cancelled"));
+  signal?.addEventListener("abort", onAbort, { once: true });
 
   const opened = await daemon.open({
-    caseId, condition, choices, context, timeoutMs,
+    caseId, condition, choices, context, timeoutMs, closeOnComplete: opts.closeOnComplete ?? false,
     jurors: jurorIds.map((id) => ({ id, sender: conn.jurors.get(id).id })),
   });
   await terse.openCase(caseId, opened.registry, opened.phase, opened.head);
@@ -108,6 +112,7 @@ export async function runLiveCase(opts) {
       await terse.appendEntry(caseId, r.entry, r.head);
       seqToMessage[r.entry.seq] = { messageId, fromId, kind, round };
       stats[r.entry.status] = (stats[r.entry.status] ?? 0) + 1;
+      hooks.onEntry?.(r.entry);
     }).catch((e) => { if (!(e instanceof DaemonError) || e.code === "daemon_exit") abort(e); else log(`admit ${kind}: ${e.message}`); });
   });
 
@@ -189,7 +194,8 @@ export async function runLiveCase(opts) {
           intruderAgent.post().catch((e) => log(`intruder: ${e.message}`));
         }
         scriptedJurors?.onPhase(next);
-        hooks.onPhase?.(next, hookCtx);
+        // Model calls must not block admission or the Clerk's deadline clock.
+        Promise.resolve().then(() => hooks.onPhase?.(next, hookCtx)).catch(abort);
       }
       if (r.phase.closed) await finalize();
     }).catch((e) => abort(e));
@@ -208,6 +214,7 @@ export async function runLiveCase(opts) {
     unsubDm?.();
     await queue.idle().catch(() => {});
     daemon.close();
+    signal?.removeEventListener("abort", onAbort);
     await terse.close?.();
     await conn.close?.();
   }

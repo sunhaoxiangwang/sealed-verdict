@@ -3,9 +3,7 @@ import { useTribunal } from "../store/tribunal";
 
 const LINKS = [
   { to: "/courtroom", label: "Courtroom" },
-  { to: "/results", label: "Results" },
-  { to: "/replay", label: "Replay" },
-  { to: "/certificate", label: "Certificate" },
+  { to: "/certificate", label: "Conclusion" },
 ];
 
 function SealGlyph() {
@@ -47,7 +45,7 @@ export default function TopNav() {
       </nav>
       <span className="pill" aria-label={`Current phase: ${phase}`}>
         <span className="pill-k">phase</span>
-        <span className="pill-v">{phase}</span>
+        <span className="pill-v">{phase === "verdict" ? "conclusion" : phase}</span>
       </span>
     </header>
   );

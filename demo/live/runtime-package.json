@@ -1,0 +1,9 @@
+{
+  "private": true,
+  "dependencies": {
+    "@relaycast/engine": "12.3.0",
+    "bun": "1.4.2",
+    "terse-cli": "0.14.9"
+  },
+  "overrides": { "better-sqlite3": "13.0.3" }
+}

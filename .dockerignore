@@ -1,0 +1,14 @@
+.git
+.env
+**/.env
+**/.env.*
+**/node_modules
+**/target
+**/dist
+**/.tokens
+**/.cache
+**/.durable-actors
+.runtime
+demo/live/runs
+apps/actors/out
+eval/results

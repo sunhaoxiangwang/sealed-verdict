@@ -3,6 +3,10 @@
   "private": true,
   "description": "Sealed Verdict: commit-reveal LLM juries with verifiable verdict certificates",
   "scripts": {
+    "demo:setup": "bash demo/live/setup.sh",
+    "demo:live": "node demo/live/start.mjs",
+    "demo:check": "node demo/live/check.mjs",
+    "demo:superserve": "node demo/live/superserve.mjs",
     "test:protocol": "cargo test --manifest-path packages/protocol/Cargo.toml",
     "test:actors": "cargo test --manifest-path apps/actors/Cargo.toml",
     "test:wasm": "node --test packages/protocol/js/verify.test.mjs",

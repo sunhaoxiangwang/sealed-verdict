@@ -86,6 +86,26 @@ fn open_is_fresh_and_single() {
 }
 
 #[test]
+fn completion_closes_only_after_all_admitted_evidence() {
+    let mut d = daemon();
+    let mut params = open_params("complete-early", "C5");
+    params["closeOnComplete"] = json!(true);
+    params["timeoutMs"] = json!(90_000);
+    let opened = ok(call(&mut d, "open", params));
+    let now = opened["phase"]["deadlineMs"].as_u64().unwrap() - 90_000;
+    let evidence = opened["evidence"].as_array().unwrap();
+    admit(&mut d, "evidence", &evidence[0]);
+    assert!(ok(call(&mut d, "tick", json!({"nowMs": now})))["closed"].is_null());
+    admit(&mut d, "evidence", &evidence[0]); // duplicate must not count
+    assert!(ok(call(&mut d, "tick", json!({"nowMs": now})))["closed"].is_null());
+    admit(&mut d, "evidence", &evidence[1]);
+    let closed = ok(call(&mut d, "tick", json!({"nowMs": now})));
+    assert_eq!(closed["phase"]["phase"], "commit");
+    assert_eq!(closed["closed"]["msg"]["body"]["ts"], now);
+    assert!(ok(call(&mut d, "tick", json!({"nowMs": now})))["closed"].is_null());
+}
+
+#[test]
 fn sign_requires_known_sender_open_phase_and_round() {
     let mut d = daemon();
     let r = ok(call(&mut d, "open", open_params("live-sign", "C3")));

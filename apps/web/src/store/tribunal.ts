@@ -1,5 +1,6 @@
 import { create } from "zustand";
-import type { Argument, Condition, Evidence, Phase, Signed, TribunalEvent, VerdictCert } from "../protocol/types";
+import type { Argument, Condition, Evidence, Phase, Signed, TribunalEvent, VerdictCert, Vote } from "../protocol/types";
+import type { ProtocolBundle } from "../protocol/native";
 import { verify } from "../protocol/crypto";
 
 export type Juror = {
@@ -10,11 +11,11 @@ export type Juror = {
   byzantine: boolean;
   committed: boolean;
   revealed: boolean;
-  vote?: "true" | "false" | "uncertain";
+  vote?: Vote;
   confidence?: number;
   speaking: boolean;
   lastSpokeAt?: number;
-  firstVote?: "true" | "false" | "uncertain";
+  firstVote?: Vote;
   flipped?: boolean;
 };
 
@@ -47,6 +48,7 @@ export type TribunalState = {
   keys: Record<string, string>;
   chainBroken: boolean;
   source: "mock" | "live";
+  protocolBundle?: ProtocolBundle;
 };
 
 type TribunalActions = {
@@ -56,6 +58,7 @@ type TribunalActions = {
   reset: () => void;
   setChainBroken: (b: boolean) => void;
   setSource: (s: "mock" | "live") => void;
+  setProtocolBundle: (bundle: ProtocolBundle) => void;
 };
 
 const initial: TribunalState = {
@@ -71,7 +74,8 @@ const initial: TribunalState = {
   messages: [],
   keys: {},
   chainBroken: false,
-  source: "mock",
+  source: "live",
+  protocolBundle: undefined,
 };
 
 let seq = 0;
@@ -100,7 +104,7 @@ export function createTribunalStore() {
         const pub = s.keys[m.signer];
         return pub ? verify(m, pub) : flag;
       };
-      const voteInfo = (id: string, v: "true" | "false" | "uncertain") => {
+      const voteInfo = (id: string, v: Vote) => {
         const j = s.jurors.find((x) => x.id === id);
         return { firstVote: j?.firstVote ?? v, flipped: !!j?.flipped || (j?.firstVote !== undefined && j.firstVote !== v) };
       };
@@ -152,7 +156,7 @@ export function createTribunalStore() {
           };
         }
         case "phase":
-          return { phase: e.msg.phase, feed: [...s.feed, mkItem("phase", `phase: ${e.msg.phase}`)] };
+          return { phase: e.msg.phase, ...(e.msg.phase === "commit" ? { jurors: s.jurors.map(j => ({ ...j, committed: false, revealed: false })) } : {}), feed: [...s.feed, mkItem("phase", `phase: ${e.msg.phase}`)] };
         case "system":
           return { feed: [...s.feed, mkItem("system", e.text, { verified: e.level !== "error" })] };
       }
@@ -169,6 +173,14 @@ export function createTribunalStore() {
 
   // Mutates one stored Argument's text so the signature and hash chain genuinely fail.
   tamper: () => {
+    if (get().protocolBundle) {
+      const bundle = structuredClone(get().protocolBundle!);
+      const argument = bundle.transcript.find(e => e.kind === "argument" && e.status === "accepted");
+      if (!argument) return false;
+      argument.msg.body.text += " [edited]";
+      set({ protocolBundle: bundle, chainBroken: true });
+      return true;
+    }
     const args = get().messages.map((m, i) => ({ m, i })).filter((x) => x.m.kind === "argument");
     if (args.length === 0) return false;
     const target = args[Math.min(1, args.length - 1)];
@@ -188,6 +200,13 @@ export function createTribunalStore() {
   setChainBroken: (b) => set({ chainBroken: b }),
 
   setSource: (s) => set({ source: s }),
+  setProtocolBundle: (bundle) => {
+    const b = bundle.cert.body;
+    set({ protocolBundle: bundle, phase: "verdict", certificate: {
+      caseId: b.caseId, verdict: b.verdict, quorum: `${b.quorum.counted}/${b.quorum.n} ballots; ${b.quorum.needed} matching required`,
+      transcriptRoot: b.transcriptRoot, evidenceIds: b.evidenceIds, voterSigs: b.votes.map(v => v.sig),
+    } });
+  },
 }));
 }
 

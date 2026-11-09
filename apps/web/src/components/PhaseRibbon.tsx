@@ -13,7 +13,7 @@ export default function PhaseRibbon() {
         const active = i === at;
         return (
           <li key={p} className={`phase ${active ? "active" : ""} ${done ? "done" : ""}`} aria-current={active ? "step" : undefined}>
-            <span className="phase-label">{p}</span>
+            <span className="phase-label">{p === "verdict" ? "conclusion" : p}</span>
             {done && <span className="stamp stamp-green stamp-done" aria-hidden="true">Done</span>}
             {active && <span className="stamp stamp-red" aria-hidden="true">Open</span>}
           </li>
